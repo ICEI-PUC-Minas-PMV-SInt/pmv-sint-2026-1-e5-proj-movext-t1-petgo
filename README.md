@@ -6,7 +6,7 @@
 
 `Eixo 5`
 
-DescPara tutores que sofrem com a falta de tempo e a dificuldade de encontrar serviços confiáveis, o PetGo surge como uma plataforma completa que vai além do cuidado básico. O grande coração do app é o seu sistema de doações e apoio à causa animal: ao utilizar nossos serviços ou realizar compras no shop, você contribui diretamente para ONGs parceiras. É a solução perfeita para quem quer garantir o bem-estar do próprio pet e, ao mesmo tempo, ajudar animais que ainda esperam por um lar, transformando cada passeio em um ato de solidariedade.
+O PetGo foi pensando para tutores que sofrem com a falta de tempo e a dificuldade de encontrar serviços confiáveis, o PetGo surge como uma plataforma completa que vai além do cuidado básico. O grande coração do app é o seu sistema de doações e apoio à causa animal: ao utilizar nossos serviços ou realizar compras no shop, você contribui diretamente para ONGs parceiras. É a solução perfeita para quem quer garantir o bem-estar do próprio pet e, ao mesmo tempo, ajudar animais que ainda esperam por um lar, transformando cada passeio em um ato de solidariedade.
 
 Diferente de lojas genéricas ou aplicativos isolados, o PetGo une passeios, shop e adoções responsáveis em um ecossistema único focado na confiança. Nosso diferencial é a transparência e o compromisso social, onde cada transação gera um impacto real na vida de animais resgatados. Com o PetGo, você resolve a logística da sua rotina e ainda faz parte de uma comunidade que prioriza a vida animal, garantindo que o cuidado com o seu melhor amigo também alimente a esperança de muitos outros.
 
