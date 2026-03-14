@@ -84,7 +84,7 @@ cd pmv-sint-2026-1-e5-proj-movext-t1-petgo
 
 ```bash
 # Navegar para a pasta do backend
-cd src/backend/petgo-api
+cd src/petgo-api
 
 # Restaurar dependências
 dotnet restore
@@ -116,7 +116,7 @@ dotnet run
 
 ```bash
 # Em um novo terminal, navegar para a pasta do frontend
-cd src/frontend/petgo-frontend
+cd src/petgo-frontend
 
 # Instalar dependências
 npm install
@@ -225,14 +225,14 @@ rm -rf .next
 ### **Backend (Testes Unitários)**
 
 ```bash
-cd src/backend/petgo-api
+cd src/petgo-api
 dotnet test
 ```
 
 ### **Frontend (Em desenvolvimento)**
 
 ```bash
-cd src/frontend/petgo-frontend
+cd src/petgo-frontend
 npm test
 ```
 
