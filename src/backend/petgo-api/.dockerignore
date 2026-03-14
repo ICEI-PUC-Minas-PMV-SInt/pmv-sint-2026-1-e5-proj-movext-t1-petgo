@@ -1,0 +1,41 @@
+# Pastas de build
+bin/
+obj/
+out/
+
+# Visual Studio
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Banco de dados local
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+logs/
+*.log
+
+# Secrets
+appsettings.Development.json
+*.pfx
+*.key
+
+# Node 
+node_modules/
+npm-debug.log
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentação
+README.md
+*.md
+
+# Migrations/
