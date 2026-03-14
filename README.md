@@ -12,14 +12,13 @@
 * Ligia de Castro Martins
 * Olivier Lopes Rubinger
 
-
 ## Orientador
 
 * Udo Fritzke Junior
 
 ## Cliente/ONG - OPA Bixos
 
-Representante: Alexia
+Representante: Alexia Muzzi Carnevali Dubois
 
 Instagram: https://www.instagram.com/opabichos?igsh=Ym5yZHN4cDIyaXNm
 
