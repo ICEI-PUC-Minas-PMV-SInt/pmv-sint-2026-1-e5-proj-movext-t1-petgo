@@ -76,8 +76,8 @@ Certifique-se de ter instalado:
 ### 1️⃣ **Clonar o Repositório**
 
 ```bash
-git clone https://github.com/[seu-usuario]/PetGo.git
-cd PetGo
+git clone https://github.com/ICEI-PUC-Minas-PMV-SInt/pmv-sint-2026-1-e5-proj-movext-t1-petgo.git
+cd pmv-sint-2026-1-e5-proj-movext-t1-petgo
 ```
 
 ### 2️⃣ **Configurar e Executar o Backend (.NET Core)**
