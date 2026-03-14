@@ -17,6 +17,12 @@
 
 * Udo Fritzke Junior
 
+## Cliente/ONG - OPA Bixos
+
+Representante: Alexia
+
+Instagram: https://www.instagram.com/opabichos?igsh=Ym5yZHN4cDIyaXNm
+
 ## 📋 Sobre o Projeto
 
 **PetGo** é uma plataforma completa para cuidado de animais de estimação que conecta tutores, prestadores de serviços (dog walkers/pet sitters) e voluntários de **ONGs de adoção**. Pensado para tutores que sofrem com a falta de tempo e a dificuldade de encontrar serviços confiáveis, o PetGo vai além do cuidado básico ao reunir, em um só ecossistema, conveniência, confiança e impacto social.
