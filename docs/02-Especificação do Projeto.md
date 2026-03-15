@@ -20,7 +20,7 @@ Gerencia as regras de negócio e a comunicação com o banco de dados, hospedado
 
 * **Tecnologias:** ASP.NET Core 9.0, Entity Framework Core 9.0 (ORM).
 * **Documentação:** Swagger/OpenAPI.
-* **Produção:** [Link da API](https://petgo-production.up.railway.app/swagger)
+* **Produção:** [https://petgo-production.up.railway.app/swagger]
 
 ### Banco de Dados
 
