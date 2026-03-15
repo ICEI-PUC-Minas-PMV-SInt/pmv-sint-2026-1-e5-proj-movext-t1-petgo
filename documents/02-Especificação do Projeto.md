@@ -29,7 +29,7 @@ Gerencia as regras de negócio e a comunicação com o banco de dados, hospedado
 
 ## Project Model Canvas
 
-![Project Model Canvas](documents/img/ProjectModelCanva.png)
+![Projec Model Canva](img/ProjectModelCanva.png)
 
 ## Requisitos
 
@@ -73,27 +73,48 @@ A priorização utiliza a técnica **MoSCoW** (Must Have, Should Have, Could Hav
 
 ## Diagrama de Casos de Uso
 
-O diagrama de casos de uso é o próximo passo após a elicitação de requisitos, que utiliza um modelo gráfico e uma tabela com as descrições sucintas dos casos de uso e dos atores. Ele contempla a fronteira do sistema e o detalhamento dos requisitos funcionais com a indicação dos atores, casos de uso e seus relacionamentos. 
-
-As referências abaixo irão auxiliá-lo na geração do artefato “Diagrama de Casos de Uso”.
-
-> **Links Úteis**:
-> - [Criando Casos de Uso](https://www.ibm.com/docs/pt-br/elm/6.0?topic=requirements-creating-use-cases)
-> - [Como Criar Diagrama de Caso de Uso: Tutorial Passo a Passo](https://gitmind.com/pt/fazer-diagrama-de-caso-uso.html/)
-> - [Lucidchart](https://www.lucidchart.com/)
-> - [Astah](https://astah.net/)
-> - [Diagrams](https://app.diagrams.net/)
+![Diagrama de Casos de Uso](img/DiagramaCasodeUso.png)
 
 ## Modelo ER (Projeto Conceitual)
 
-O Modelo ER representa através de um diagrama como as entidades (coisas, objetos) se relacionam entre si na aplicação interativa.
-
-Sugestão de ferramentas para geração deste artefato: LucidChart e Draw.io.
-
-A referência abaixo irá auxiliá-lo na geração do artefato “Modelo ER”.
-
-> - [Como fazer um diagrama entidade relacionamento | Lucidchart](https://www.lucidchart.com/pages/pt/como-fazer-um-diagrama-entidade-relacionamento)
+![Modelo ER](<img/Modelo ER.png>)
 
 ## Projeto da Base de Dados
 
-O projeto da base de dados corresponde à representação das entidades e relacionamentos identificadas no Modelo ER, no formato de tabelas, com colunas e chaves primárias/estrangeiras necessárias para representar corretamente as restrições de integridade.
+
+### Estrutura das Tabelas (Schema)
+
+* **Usuarios:** id (PK), nome, email, senha, telefone.
+* **Pets:** id (PK), nome, idade, descricao, status_adocao, id_ong (FK).
+* **Produtos:** id (PK), nome, descricao, preco.
+* **Avaliacoes:** id (PK), nota, comentario, id_usuario (FK).
+
+## Personas e Histórias de Usuário
+
+* **Persona 1 (Tutor):** Mariana Souza (29 anos). Busca serviços confiáveis e segurança para seu pet.
+* **Persona 2 (Prestador):** Carlos Mendes (34 anos). Precisa de visibilidade e avaliações para seu trabalho.
+* **Persona 3 (ONG):** Juliana Ferreira (38 anos). Focada em aumentar o alcance das adoções da OPA Bichos.
+
+### Matriz de Rastreabilidade
+
+| Requisito | História de Usuário (US) | Descrição Resumida |
+| --- | --- | --- |
+| RF-001 | US01 | Cadastro na plataforma para acesso aos serviços |
+| RF-008 | US02 | Busca de prestadores confiáveis por tutores |
+| RF-007 | US03 | Cadastro de serviços por prestadores |
+| RF-006 | US04 | Divulgação de pets para adoção pelas ONGs |
+| RF-009 | US05 | Avaliação de serviços para gerar credibilidade |
+
+## Gerenciamento do Projeto
+
+### Cronograma e DevOps
+
+O desenvolvimento segue as etapas de Planejamento, Modelagem, Desenvolvimento, Testes e Entrega Final. A qualidade é garantida via:
+
+* **Versionamento:** Git e GitHub com CI/CD.
+* **Padronização:** ESLint, Prettier e Husky.
+
+### Custos e Recursos Humanos
+
+O projeto utiliza tecnologias *open-source* de custo zero (nível acadêmico). A equipe é composta por estudantes divididos entre design, desenvolvimento frontend/backend, banco de dados e documentação.
+
