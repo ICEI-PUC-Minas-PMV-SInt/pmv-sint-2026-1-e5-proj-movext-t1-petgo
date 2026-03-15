@@ -1,69 +1,75 @@
 # Especificações do Projeto
 
-<span style="color:red">Pré-requisitos: <a href="1-Documentação de Contexto.md"> Documentação de Contexto</a></span>
-
-Definição do problema e ideia de solução a partir da perspectiva do usuário. É composta pela definição do  diagrama de personas, histórias de usuários, requisitos funcionais e não funcionais além das restrições do projeto.
-
-Apresente uma visão geral do que será abordado nesta parte do documento, enumerando as técnicas e/ou ferramentas utilizadas para realizar a especificações do projeto
+A especificação do projeto detalha a solução proposta para o problema apresentado na documentação de contexto, descrevendo as funcionalidades, requisitos e estrutura tecnológica da aplicação PetGo. Esta etapa define os componentes do sistema necessários para atender tutores, prestadores de serviços e organizações de proteção animal.
 
 ## Arquitetura e Tecnologias
 
-o	Descreva brevemente a arquitetura definida para o projeto e as tecnologias a serem utilizadas. Sugere-se a criação de um diagrama de componentes da solução.
+A plataforma PetGo utiliza uma arquitetura cliente-servidor, com separação clara entre frontend, backend e banco de dados, garantindo escalabilidade e facilidade de manutenção.
+
+# Frontend
+
+Responsável pela interface e experiência do usuário (UX), hospedado na plataforma **Vercel**.
+
+* **Tecnologias:** Next.js 15, React, TypeScript 5, Tailwind CSS 4.
+* **Bibliotecas:** React Query (estado), React Hook Form (formulários), Zod (validação), Axios (HTTP), Lucide React (ícones).
+* **Produção:** [https://pet-go-puc.vercel.app](https://pet-go-puc.vercel.app)
+
+### Backend (API REST)
+
+Gerencia as regras de negócio e a comunicação com o banco de dados, hospedado na plataforma **Railway**.
+
+* **Tecnologias:** ASP.NET Core 9.0, Entity Framework Core 9.0 (ORM).
+* **Documentação:** Swagger/OpenAPI.
+* **Produção:** [Link da API](https://petgo-production.up.railway.app/swagger)
+
+### Banco de Dados
+
+* **Tecnologia:** Supabase PostgreSQL 15.
+* **Recursos:** Connection Pooler (PgBouncer) e backups automáticos.
 
 ## Project Model Canvas
 
-Colocar a imagem do modelo construído apresentando a proposta de solução.
-
-> **Links Úteis**:
-> Disponíveis em material de apoio do projeto
+![Project Model Canvas](documents/img/ProjectModelCanva.png)
 
 ## Requisitos
 
-As tabelas que se seguem apresentam os requisitos funcionais e não funcionais que detalham o escopo do projeto. Para determinar a prioridade de requisitos, aplicar uma técnica de priorização de requisitos e detalhar como a técnica foi aplicada.
+A priorização utiliza a técnica **MoSCoW** (Must Have, Should Have, Could Have).
 
-### Requisitos Funcionais
+### Requisitos Funcionais (RF)
 
-|ID    | Descrição do Requisito  | Prioridade |
-|------|-----------------------------------------|----|
-|RF-001| Permitir que o usuário cadastre tarefas | ALTA | 
-|RF-002| Emitir um relatório de tarefas no mês   | MÉDIA |
+| ID | Descrição do Requisito | Prioridade |
+| --- | --- | --- |
+| RF-001 | Permitir cadastro de usuários na plataforma | ALTA |
+| RF-002 | Permitir autenticação e login de usuários | ALTA |
+| RF-003 | Permitir gerenciamento de usuários (criação, edição e exclusão) | ALTA |
+| RF-004 | Permitir visualizar catálogo de produtos para pets | ALTA |
+| RF-005 | Permitir cadastrar, editar e remover produtos | MÉDIA |
+| RF-006 | Permitir visualizar pets disponíveis para adoção | ALTA |
+| RF-007 | Permitir cadastrar, editar e remover pets no sistema | ALTA |
+| RF-008 | Permitir conexão entre tutores e prestadores de serviços | ALTA |
+| RF-009 | Permitir sistema de avaliações de serviços e produtos | MÉDIA |
+| RF-010 | Permitir acesso às informações das ONGs parceiras | MÉDIA |
 
-### Requisitos não Funcionais
+### Requisitos Não Funcionais (RNF)
 
-|ID     | Descrição do Requisito  |Prioridade |
-|-------|-------------------------|----|
-|RNF-001| O sistema deve ser responsivo para rodar em um dispositivos móvel | MÉDIA | 
-|RNF-002| Deve processar requisições do usuário em no máximo 3s |  BAIXA | 
-
-Com base nas Histórias de Usuário, enumere os requisitos da sua solução. Classifique esses requisitos em dois grupos:
-
-- [Requisitos Funcionais
- (RF)](https://pt.wikipedia.org/wiki/Requisito_funcional):
- correspondem a uma funcionalidade que deve estar presente na
-  plataforma (ex: cadastro de usuário).
-- [Requisitos Não Funcionais
-  (RNF)](https://pt.wikipedia.org/wiki/Requisito_n%C3%A3o_funcional):
-  correspondem a uma característica técnica, seja de usabilidade,
-  desempenho, confiabilidade, segurança ou outro (ex: suporte a
-  dispositivos iOS e Android).
-Lembre-se que cada requisito deve corresponder à uma e somente uma
-característica alvo da sua solução. Além disso, certifique-se de que
-todos os aspectos capturados nas Histórias de Usuário foram cobertos.
+| ID | Descrição do Requisito | Prioridade |
+| --- | --- | --- |
+| RNF-001 | O sistema deve ser acessível via web e dispositivos móveis (Responsivo) | ALTA |
+| RNF-002 | O tempo de resposta das requisições deve ser inferior a 3 segundos | MÉDIA |
+| RNF-003 | O sistema deve garantir segurança e proteção dos dados (LGPD) | ALTA |
+| RNF-004 | A API deve possuir documentação acessível via Swagger | ALTA |
+| RNF-005 | O sistema deve permitir deploy contínuo automatizado (CI/CD) | MÉDIA |
+| RNF-006 | O sistema deve ser escalável para futuras funcionalidades | BAIXA |
 
 ## Restrições
 
-O projeto está restrito pelos itens apresentados na tabela a seguir.
 
-|ID| Restrição                                             |
-|--|-------------------------------------------------------|
-|01| O projeto deverá ser entregue até o final do semestre |
-|02| Não pode ser desenvolvido um módulo de backend        |
-
-Enumere as restrições à sua solução. Lembre-se de que as restrições geralmente limitam a solução candidata.
-
-> **Links Úteis**:
-> - [O que são Requisitos Funcionais e Requisitos Não Funcionais?](https://codificar.com.br/requisitos-funcionais-nao-funcionais/)
-> - [O que são requisitos funcionais e requisitos não funcionais?](https://analisederequisitos.com.br/requisitos-funcionais-e-requisitos-nao-funcionais-o-que-sao/)
+| ID | Restrição |
+| --- | --- |
+| 01 | O projeto deverá ser entregue até o final do semestre letivo |
+| 02 | O desenvolvimento será realizado exclusivamente pela equipe de alunos |
+| 03 | A integração com a ONG será limitada à divulgação e adoção de pets |
+| 04 | O projeto deve utilizar ferramentas gratuitas ou acadêmicas |
 
 ## Diagrama de Casos de Uso
 
