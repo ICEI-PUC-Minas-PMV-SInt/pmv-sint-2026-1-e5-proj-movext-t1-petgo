@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("petgo.test")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+11843b49dd1631e28819301cd7b24fca75accd44")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f68e0d6f14e5fe9572f85304f0647283a131d496")]
 [assembly: System.Reflection.AssemblyProductAttribute("petgo.test")]
 [assembly: System.Reflection.AssemblyTitleAttribute("petgo.test")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
