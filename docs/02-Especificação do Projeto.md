@@ -29,7 +29,7 @@ Gerencia as regras de negócio e a comunicação com o banco de dados, hospedado
 
 ## Project Model Canvas
 
-![Projec Model Canva](img/canvas-petgo.jpg)
+![Projec Model Canva](img/canvas.petgo.jpg)
 
 ## Requisitos
 
@@ -73,11 +73,11 @@ A priorização utiliza a técnica **MoSCoW** (Must Have, Should Have, Could Hav
 
 ## Diagrama de Casos de Uso
 
-![Diagrama de Casos de Uso](img/DiagramaCasodeUso.png)
+![Diagrama de Casos de Uso](img/Diagrama-Casos-de-Uso.png)
 
 ## Modelo ER (Projeto Conceitual)
 
-![Modelo ER](<img/Modelo ER.png>)
+![Modelo ER](<img/Modelo-ER.png>)
 
 ## Projeto da Base de Dados
 
