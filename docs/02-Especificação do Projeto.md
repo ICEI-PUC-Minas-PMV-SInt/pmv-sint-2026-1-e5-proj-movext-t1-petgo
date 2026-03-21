@@ -29,7 +29,7 @@ Gerencia as regras de negócio e a comunicação com o banco de dados, hospedado
 
 ## Project Model Canvas
 
-![Projec Model Canva](img/canvas.petgo.jpg)
+![Projec Model Canva](img/canvas-petgo.jpg)
 
 ## Requisitos
 
