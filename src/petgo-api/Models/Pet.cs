@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 using petgo_api.Enums;
@@ -10,24 +11,34 @@ namespace petgo_api.Models
     public class Pet
     {
         [Key]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
-        [Required(ErrorMessage = "O nome do pet é obrigatório")]
-        [MaxLength(50)]
-        public string Nome { get; set; }
+        [Required(ErrorMessage = "O nome do pet é obrigatório.")]
+        [MaxLength(50, ErrorMessage = "O nome não pode exceder 50 caracteres.")]
+        public string Nome { get; set; } = string.Empty;
 
         [Required]
-        [Range(0, 30, ErrorMessage = "A idade deve estar entre 0 e 30 anos")]
+        public Especie Especie { get; set; }
+
+        [MaxLength(50)]
+        public string Raca { get; set; } = "Vira-lata";
+
         public int Idade { get; set; }
 
+        [Required]
+        public StatusPet Status { get; set; }
+
         [MaxLength(500)]
-        public string Descricao { get; set; }
+        public string Descricao { get; set; } = string.Empty;
+
+        public string FotoUrl { get; set; } = string.Empty;
 
         [Required]
-        public Porte Porte { get; set; }
+        public Guid UsuarioId { get; set; }
 
-        [Required]
-        public Guid OngId { get; set; }
-        public Ong Ong { get; set; } = null!;
+        [ForeignKey("UsuarioId")]
+        public virtual Usuario Usuario { get; set; }
+
+        public DateTime DataCadastro { get; set; } = DateTime.UtcNow;
     }
 }

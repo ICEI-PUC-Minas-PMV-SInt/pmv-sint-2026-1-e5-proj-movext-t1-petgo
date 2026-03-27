@@ -13,22 +13,31 @@ namespace petgo_api.Data
         {
         }
 
+        public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Pet> Pets { get; set; }
-        public DbSet<Ong> Ongs { get; set; }
+        public DbSet<Produto> Produtos { get; set; }
+        public DbSet<Pedido> Pedidos { get; set; }
+        public DbSet<ItemPedido> ItensPedido { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Pet>()
-                .Property(p => p.Porte)
-                .HasConversion<string>();
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                var properties = entityType.GetProperties()
+                    .Where(p => p.ClrType == typeof(decimal));
 
-            modelBuilder.Entity<Pet>()
-                .HasOne(p => p.Ong)
-                .WithMany(o => o.Pets)
-                .HasForeignKey(p => p.OngId)
-                .IsRequired();
+                foreach (var property in properties)
+                {
+                    property.SetPrecision(18);
+                    property.SetScale(2);
+                }
+            }
+            modelBuilder.Entity<Usuario>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
         }
+
 
     }
 }
