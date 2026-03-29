@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using petgo_api.Data;
+using petgo_api.Services.Usuarios;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services.AddScoped<IUsuarioInterface, UsuarioService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
