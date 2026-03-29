@@ -4,7 +4,7 @@ namespace petgo_api.Enums
     {
         Adotante,
         Ong,
-        Prestador,
+        Passeador,
         Admin
     }
 }
