@@ -7,7 +7,7 @@ namespace petgo_api.Models
     public class Pet
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
 
         [Required(ErrorMessage = "O nome do pet é obrigatório.")]
         [MaxLength(50, ErrorMessage = "O nome não pode exceder 50 caracteres.")]

@@ -127,7 +127,6 @@ namespace petgo_api.Services.Usuarios
                     response.Messagem = " Usuário não encontrado!";
                     return response;
                 }
-                ;
 
                 _context.Usuarios.Remove(usuario);
                 await _context.SaveChangesAsync();
