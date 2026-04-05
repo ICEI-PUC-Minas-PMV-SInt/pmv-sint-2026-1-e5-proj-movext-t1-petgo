@@ -68,12 +68,19 @@ namespace petgo_api.Services.Usuarios
 
             return response;
         }
-        public async Task<ApiResponse<UsuarioResponseDto>> EditarUsuario(Guid idUsuario, UsuarioUpdateDto usuarioUpdate)
+        public async Task<ApiResponse<UsuarioResponseDto>> EditarUsuario(Guid idUsuario, UsuarioUpdateDto usuarioUpdate, Guid usuarioLogadoId)
         {
             var response = new ApiResponse<UsuarioResponseDto>();
 
             try
             {
+                if (idUsuario != usuarioLogadoId)
+                {
+                    response.Status = false;
+                    response.Messagem = "Você não tem permissão para editar outro usuário!";
+                    return response;
+                }
+
                 var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == idUsuario);
 
                 if (usuario == null)
@@ -182,9 +189,42 @@ namespace petgo_api.Services.Usuarios
             return response;
         }
 
-        public Task<ApiResponse<Usuario>> GetUsuarioByPetId(Guid PetId)
+        public async Task<ApiResponse<UsuarioResponseDto>> GetUsuarioByPetId(Guid petId)
         {
-            throw new NotImplementedException();
+            var response = new ApiResponse<UsuarioResponseDto>();
+
+            try
+            {
+                var usuario = await _context.Usuarios
+                                .Include(u => u.Pets)
+                                .FirstOrDefaultAsync(u => u.Pets.Any(p => p.Id == petId));
+
+                if (usuario == null)
+                {
+                    response.Status = false;
+                    response.Messagem = "Usuário não encontrado para esse pet.";
+                    return response;
+                }
+
+                response.Dados = new UsuarioResponseDto
+                {
+                    Id = usuario.Id,
+                    Nome = usuario.Nome,
+                    Email = usuario.Email,
+                    Documento = usuario.Documento,
+                    Tipo = usuario.Tipo,
+                    Endereco = usuario.Endereco,
+                    DataCadastro = usuario.DataCadastro
+                };
+
+                response.Status = true;
+            }
+            catch (Exception ex)
+            {
+                response.Status = false;
+                response.Messagem = ex.Message;
+            }
+            return response;
         }
 
         public async Task<ApiResponse<List<UsuarioResponseDto>>> ListarUsuarios()

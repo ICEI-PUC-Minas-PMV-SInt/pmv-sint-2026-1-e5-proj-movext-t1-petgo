@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using petgo_api.DTOs.Usuario;
 using petgo_api.Models;
@@ -7,7 +8,7 @@ namespace petgo_api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UsuariosController : ControllerBase
+    public class UsuariosController : BaseController
     {
         private readonly IUsuarioInterface _usuarioInterface;
         public UsuariosController(IUsuarioInterface usuarioInterface)
@@ -49,10 +50,11 @@ namespace petgo_api.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<UsuarioResponseDto>>> EditarUsuario(Guid id, UsuarioUpdateDto usuarioUpdate)
         {
-            var response = await _usuarioInterface.EditarUsuario(id, usuarioUpdate);
+            var response = await _usuarioInterface.EditarUsuario(id, usuarioUpdate, GetUsuarioLogadoId());
 
             if (!response.Status)
             {
@@ -83,6 +85,19 @@ namespace petgo_api.Controllers
             if (!response.Status)
             {
                 return Unauthorized(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpGet("pet/{petId}")]
+        public async Task<ActionResult<ApiResponse<UsuarioResponseDto>>> GetUsuarioByPetId(Guid petId)
+        {
+            var response = await _usuarioInterface.GetUsuarioByPetId(petId);
+
+            if (!response.Status)
+            {
+                return NotFound(response);
             }
 
             return Ok(response);

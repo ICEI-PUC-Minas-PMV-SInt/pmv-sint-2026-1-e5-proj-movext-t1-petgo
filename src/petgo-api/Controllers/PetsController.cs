@@ -9,7 +9,7 @@ namespace petgo_api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PetsController : ControllerBase
+    public class PetsController : BaseController
     {
         private readonly IPetInterface _petInterface;
         public PetsController(IPetInterface petInterface)
@@ -25,10 +25,11 @@ namespace petgo_api.Controllers
             return Ok(pets);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<ApiResponse<PetResponseDto>>> CriarPet(PetCreateDto pet)
         {
-            var response = await _petInterface.CriarPet(pet);
+            var response = await _petInterface.CriarPet(pet, GetUsuarioLogadoId());
 
             if (!response.Status)
             {
@@ -52,10 +53,11 @@ namespace petgo_api.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<PetResponseDto>>> EditarPet(Guid id, PetUpdateDto petUpdate)
         {
-            var response = await _petInterface.EditarPet(id, petUpdate);
+            var response = await _petInterface.EditarPet(id, petUpdate, GetUsuarioLogadoId());
 
             if (!response.Status)
             {
@@ -69,8 +71,7 @@ namespace petgo_api.Controllers
         [HttpPut("{id}/status")]
         public async Task<ActionResult<ApiResponse<PetResponseDto>>> AlterarStatusPet(Guid id, PetStatusUpdateDto statusUpdate)
         {
-            var usuarioLogadoId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var response = await _petInterface.AlterarStatusPet(id, statusUpdate, usuarioLogadoId);
+            var response = await _petInterface.AlterarStatusPet(id, statusUpdate, GetUsuarioLogadoId());
 
             if (!response.Status)
             {
@@ -80,10 +81,11 @@ namespace petgo_api.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> ExcluirPet(Guid id)
         {
-            var response = await _petInterface.ExcluirPet(id);
+            var response = await _petInterface.ExcluirPet(id, GetUsuarioLogadoId());
 
             if (!response.Status)
             {
@@ -108,9 +110,7 @@ namespace petgo_api.Controllers
                 });
             }
 
-            var usuarioLogadoId = Guid.Parse(userIdClaim);
-
-            var response = await _petInterface.GetPetsByUsuarioId(usuarioLogadoId);
+            var response = await _petInterface.GetPetsByUsuarioId(GetUsuarioLogadoId());
 
             if (!response.Status)
             {
@@ -119,5 +119,6 @@ namespace petgo_api.Controllers
 
             return Ok(response);
         }
+
     }
 }

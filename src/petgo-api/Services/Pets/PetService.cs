@@ -53,7 +53,7 @@ namespace petgo_api.Services.Pets
             return response;
         }
 
-        public async Task<ApiResponse<PetResponseDto>> CriarPet(PetCreateDto pet)
+        public async Task<ApiResponse<PetResponseDto>> CriarPet(PetCreateDto pet, Guid usuarioLogadoId)
         {
             var response = new ApiResponse<PetResponseDto>();
 
@@ -78,7 +78,7 @@ namespace petgo_api.Services.Pets
                     Status = pet.Status,
                     Descricao = pet.Descricao,
                     FotoUrl = pet.FotoUrl,
-                    UsuarioId = pet.UsuarioId,
+                    UsuarioId = usuarioLogadoId,
                     DataCadastro = DateTime.UtcNow
                 };
 
@@ -98,7 +98,7 @@ namespace petgo_api.Services.Pets
             return response;
         }
 
-        public async Task<ApiResponse<PetResponseDto>> EditarPet(Guid idPet, PetUpdateDto petUpdate)
+        public async Task<ApiResponse<PetResponseDto>> EditarPet(Guid idPet, PetUpdateDto petUpdate, Guid usuarioLogadoId)
         {
             var response = new ApiResponse<PetResponseDto>();
 
@@ -110,6 +110,13 @@ namespace petgo_api.Services.Pets
                 {
                     response.Status = false;
                     response.Messagem = "Pet não encontrado";
+                    return response;
+                }
+
+                if (pet.UsuarioId != usuarioLogadoId)
+                {
+                    response.Messagem = "Você não tem permissão para editar este pet!";
+                    response.Status = false;
                     return response;
                 }
 
@@ -137,7 +144,7 @@ namespace petgo_api.Services.Pets
 
         }
 
-        public async Task<ApiResponse<bool>> ExcluirPet(Guid idPet)
+        public async Task<ApiResponse<bool>> ExcluirPet(Guid idPet, Guid usuarioLogadoId)
         {
             var response = new ApiResponse<bool>();
 
@@ -149,6 +156,13 @@ namespace petgo_api.Services.Pets
                 {
                     response.Status = false;
                     response.Messagem = "Pet não encontrado";
+                    return response;
+                }
+
+                if (pet.UsuarioId != usuarioLogadoId)
+                {
+                    response.Status = false;
+                    response.Messagem = "Você não tem permissão para deletar este pet!";
                     return response;
                 }
 
