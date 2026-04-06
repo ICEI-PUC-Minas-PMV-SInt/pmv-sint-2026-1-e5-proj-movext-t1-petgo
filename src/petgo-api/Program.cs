@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Serialization;
 using petgo_api.Services.Adocoes;
+using petgo_api.Services.Produtos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<IUsuarioInterface, UsuarioService>();
 builder.Services.AddScoped<IPetInterface, PetService>();
 builder.Services.AddScoped<IAdocaoInterface, AdocaoService>();
+builder.Services.AddScoped<IProdutoInterface, ProdutoService>();
 
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
