@@ -16,6 +16,10 @@ namespace petgo_api.DTOs.Usuario
         [EmailAddress(ErrorMessage = "E-mail inválido!")]
         public string Email { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "O telefone é obrigatório.")]
+        [DataType(DataType.PhoneNumber)]
+        public string Telefone { get; set; }
+
         [Required(ErrorMessage = "A senha é obrigatória!")]
         [MinLength(8, ErrorMessage = "A senha deve ter no mínimo 8 caracteres!")]
         public string Senha { get; set; } = string.Empty;

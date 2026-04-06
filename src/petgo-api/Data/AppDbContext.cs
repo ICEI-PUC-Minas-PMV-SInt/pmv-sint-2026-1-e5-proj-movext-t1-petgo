@@ -58,6 +58,11 @@ namespace petgo_api.Data
                 .WithMany()
                 .HasForeignKey(a => a.AdotanteId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Usuario>()
+                .Property(u => u.Telefone)
+                .HasMaxLength(20)
+                .IsRequired(true);
         }
 
 

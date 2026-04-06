@@ -12,6 +12,10 @@ namespace petgo_api.Models
         [MaxLength(100, ErrorMessage = "O nome não pode exceder 100 caracteres.")]
         public string Nome { get; set; }
 
+        [Required(ErrorMessage = "O telefone é obrigatório.")]
+        [DataType(DataType.PhoneNumber)]
+        public string Telefone { get; set; }
+
         [Required(ErrorMessage = "O e-mail é obrigatório.")]
         [EmailAddress(ErrorMessage = "E-mail em formato inválido.")]
         [MaxLength(150)]

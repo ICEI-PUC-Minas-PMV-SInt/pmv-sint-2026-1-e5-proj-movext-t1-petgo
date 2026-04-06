@@ -37,6 +37,7 @@ namespace petgo_api.Services.Usuarios
                 {
                     Id = Guid.NewGuid(),
                     Nome = usuario.Nome,
+                    Telefone = usuario.Telefone,
                     Email = usuario.Email,
                     Documento = usuario.Documento,
                     Endereco = usuario.Endereco,
@@ -48,14 +49,7 @@ namespace petgo_api.Services.Usuarios
                 _context.Usuarios.Add(novoUsuario);
                 await _context.SaveChangesAsync();
 
-                response.Dados = new UsuarioResponseDto
-                {
-                    Id = novoUsuario.Id,
-                    Nome = novoUsuario.Nome,
-                    Email = novoUsuario.Email,
-                    Tipo = novoUsuario.Tipo,
-                    DataCadastro = novoUsuario.DataCadastro
-                };
+                response.Dados = MapToDto(novoUsuario);
 
                 response.Messagem = "Usuário cadastrado com sucesso";
             }
@@ -93,20 +87,12 @@ namespace petgo_api.Services.Usuarios
                 usuario.Nome = usuarioUpdate.Nome;
                 usuario.Email = usuarioUpdate.Email;
                 usuario.Endereco = usuarioUpdate.Endereco;
+                usuario.Telefone = usuarioUpdate.Telefone;
 
                 _context.Update(usuario);
                 await _context.SaveChangesAsync();
 
-                response.Dados = new UsuarioResponseDto
-                {
-                    Id = usuario.Id,
-                    Nome = usuario.Nome,
-                    Email = usuario.Email,
-                    Tipo = usuario.Tipo,
-                    Documento = usuario.Documento,
-                    Endereco = usuario.Endereco,
-                    DataCadastro = usuario.DataCadastro
-                };
+                response.Dados = MapToDto(usuario);
 
                 response.Messagem = "Usuário editado com sucesso!";
             }
@@ -166,16 +152,7 @@ namespace petgo_api.Services.Usuarios
                     return response;
                 }
 
-                response.Dados = new UsuarioResponseDto
-                {
-                    Id = usuario.Id,
-                    Nome = usuario.Nome,
-                    Email = usuario.Email,
-                    Tipo = usuario.Tipo,
-                    DataCadastro = usuario.DataCadastro,
-                    Documento = usuario.Documento,
-                    Endereco = usuario.Endereco
-                };
+                response.Dados = MapToDto(usuario);
 
                 response.Messagem = "Usuário encontrado com sucesso!";
 
@@ -206,16 +183,7 @@ namespace petgo_api.Services.Usuarios
                     return response;
                 }
 
-                response.Dados = new UsuarioResponseDto
-                {
-                    Id = usuario.Id,
-                    Nome = usuario.Nome,
-                    Email = usuario.Email,
-                    Documento = usuario.Documento,
-                    Tipo = usuario.Tipo,
-                    Endereco = usuario.Endereco,
-                    DataCadastro = usuario.DataCadastro
-                };
+                response.Dados = MapToDto(usuario);
 
                 response.Status = true;
             }
@@ -234,16 +202,7 @@ namespace petgo_api.Services.Usuarios
             {
                 var usuarios = await _context.Usuarios.ToListAsync();
 
-                var usuarioDto = usuarios.Select(u => new UsuarioResponseDto
-                {
-                    Id = u.Id,
-                    Nome = u.Nome,
-                    Email = u.Email,
-                    Tipo = u.Tipo,
-                    Documento = u.Documento,
-                    Endereco = u.Endereco,
-                    DataCadastro = u.DataCadastro
-                }).ToList();
+                var usuarioDto = usuarios.Select(u => MapToDto(u)).ToList();
 
                 response.Dados = usuarioDto;
                 response.Messagem = "Lista de usuários recuperada com sucesso!";
@@ -325,6 +284,21 @@ namespace petgo_api.Services.Usuarios
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return tokenHandler.WriteToken(token);
+        }
+
+        private static UsuarioResponseDto MapToDto(Usuario usuario)
+        {
+            return new UsuarioResponseDto
+            {
+                Id = usuario.Id,
+                Nome = usuario.Nome,
+                Email = usuario.Email,
+                Telefone = usuario.Telefone,
+                Tipo = usuario.Tipo,
+                Documento = usuario.Documento,
+                Endereco = usuario.Endereco,
+                DataCadastro = usuario.DataCadastro
+            };
         }
     }
 }
