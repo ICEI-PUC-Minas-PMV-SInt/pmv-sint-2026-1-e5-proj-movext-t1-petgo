@@ -23,7 +23,7 @@ namespace petgo_api.Models
         public Guid UsuarioId { get; set; }
 
         [ForeignKey("UsuarioId")]
-        public virtual Usuario Usuario { get; set; } = null!;
+        public virtual Usuario Usuario { get; set; }
         public virtual ICollection<ItemPedido> Itens { get; set; } = new List<ItemPedido>();
     }
 }
