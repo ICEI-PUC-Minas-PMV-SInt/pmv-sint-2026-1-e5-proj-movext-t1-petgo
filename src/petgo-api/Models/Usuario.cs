@@ -35,6 +35,7 @@ namespace petgo_api.Models
         [MaxLength(250)]
         public string Endereco { get; set; }
         public DateTime DataCadastro { get; set; }
+        public string FotoUrl { get; set; }
 
         public ICollection<Pet> Pets { get; set; } = new List<Pet>();
     }

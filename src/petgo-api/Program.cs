@@ -9,6 +9,7 @@ using System.Text.Json.Serialization;
 using petgo_api.Services.Adocoes;
 using petgo_api.Services.Produtos;
 using petgo_api.Services.Pedidos;
+using petgo_api.Services.Passeios;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,7 @@ builder.Services.AddScoped<IPetInterface, PetService>();
 builder.Services.AddScoped<IAdocaoInterface, AdocaoService>();
 builder.Services.AddScoped<IProdutoInterface, ProdutoService>();
 builder.Services.AddScoped<IPedidoInterface, PedidoService>();
+builder.Services.AddScoped<IPasseioInterface, PasseioService>();
 
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

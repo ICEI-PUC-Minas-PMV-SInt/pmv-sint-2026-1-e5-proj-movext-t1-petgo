@@ -15,7 +15,7 @@ namespace petgo_api.Data
         public DbSet<Pedido> Pedidos { get; set; }
         public DbSet<ItemPedido> ItensPedido { get; set; }
 
-        public DbSet<TipoPasseio> TiposPasseio { get; set; }
+        public DbSet<TipoPasseio> TiposPasseios { get; set; }
         public DbSet<Passeio> Passeios { get; set; }
         public DbSet<Adocao> Adocoes { get; set; }
 

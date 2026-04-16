@@ -43,6 +43,7 @@ namespace petgo_api.Services.Usuarios
                     Endereco = usuario.Endereco,
                     Tipo = usuario.Tipo,
                     DataCadastro = DateTime.Now,
+                    FotoUrl = usuario.FotoUrl,
                     SenhaHash = BCrypt.Net.BCrypt.HashPassword(usuario.Senha)
                 };
 
@@ -88,6 +89,7 @@ namespace petgo_api.Services.Usuarios
                 usuario.Email = usuarioUpdate.Email;
                 usuario.Endereco = usuarioUpdate.Endereco;
                 usuario.Telefone = usuarioUpdate.Telefone;
+                usuario.FotoUrl = usuarioUpdate.FotoUrl;
 
                 _context.Update(usuario);
                 await _context.SaveChangesAsync();
@@ -297,7 +299,8 @@ namespace petgo_api.Services.Usuarios
                 Tipo = usuario.Tipo,
                 Documento = usuario.Documento,
                 Endereco = usuario.Endereco,
-                DataCadastro = usuario.DataCadastro
+                DataCadastro = usuario.DataCadastro,
+                FotoUrl = usuario.FotoUrl
             };
         }
     }

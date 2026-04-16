@@ -27,9 +27,11 @@ namespace petgo_api.DTOs.Usuario
         [Required(ErrorMessage = "O documento é obrigatório!")]
         public string Documento { get; set; } = string.Empty;
 
-        public string? Endereco { get; set; }
+        public string Endereco { get; set; }
 
         [Required(ErrorMessage = "O tipo de usuário é obrigatório!")]
         public TipoUsuario Tipo { get; set; }
+
+        public string FotoUrl { get; set; }
     }
 }

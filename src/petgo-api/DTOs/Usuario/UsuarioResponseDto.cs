@@ -12,5 +12,6 @@ namespace petgo_api.DTOs.Usuario
         public string Documento { get; set; } = string.Empty;
         public string Endereco { get; set; }
         public DateTime DataCadastro { get; set; }
+        public string FotoUrl { get; set; }
     }
 }
