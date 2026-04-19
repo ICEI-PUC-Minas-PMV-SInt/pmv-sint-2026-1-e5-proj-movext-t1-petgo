@@ -26,9 +26,9 @@ Nesta etapa do projeto **PetGo**, foi desenvolvido exclusivamente o **back-end d
 ```bash
 git clone https://github.com/ICEI-PUC-Minas-PMV-SInt/pmv-sint-2026-1-e5-proj-movext-t1-petgo.git
 cd pmv-sint-2026-1-e5-proj-movext-t1-petgo
+```
 
-
-## 3. Execução do back-end
+### 3. Execução do back-end
 
 ```bash
 cd src/petgo-api
