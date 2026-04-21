@@ -39,13 +39,26 @@ namespace petgo_api.Services.Passeios
                     return response;
                 }
 
-                if (passeio.TutorId != usuarioLogadoId && passeio.PasseadorId != usuarioLogadoId
-                    && tipoUsuario != TipoUsuario.Admin)
+                bool isTutor = tipoUsuario == TipoUsuario.Adotante && passeio.TutorId == usuarioLogadoId;
+                bool isPasseador = tipoUsuario == TipoUsuario.Passeador && passeio.PasseadorId == usuarioLogadoId;
+                bool isAdmin = tipoUsuario == TipoUsuario.Admin;
+
+                if (!isTutor && !isPasseador && !isAdmin)
+                    return RespostaErro(response, "Você não tem permissão para alterar este passeio.");
+
+                // 2. Trava do Tutor (Só pode cancelar antes de começar)
+                if (isTutor)
                 {
-                    response.Status = false;
-                    response.Messagem = "Voçê não tem permissão para alterar esse passeio.";
-                    return response;
+                    if (statusPasseio != StatusPasseio.Cancelado)
+                        return RespostaErro(response, "Tutores só podem alterar o status para cancelar.");
+
+                    if (passeio.Status == StatusPasseio.EmAndamento || passeio.Status == StatusPasseio.Concluido)
+                        return RespostaErro(response, "Não é possível cancelar um passeio em andamento ou concluído.");
                 }
+
+                // 3. Trava de Fluxo (Evita pular etapas, opcional mas bom)
+                if (passeio.Status == StatusPasseio.Concluido)
+                    return RespostaErro(response, "Este passeio já foi finalizado e não pode mais ser alterado.");
 
                 passeio.Status = statusPasseio;
 
@@ -84,10 +97,12 @@ namespace petgo_api.Services.Passeios
 
             try
             {
-                var tipo = await _context.TiposPasseios.FirstOrDefaultAsync(tp => tp.Id == passeioCreate.TipoPasseioId);
+                var tipo = await _context.TiposPasseios
+                                        .FirstOrDefaultAsync(p => p.Id == passeioCreate.TipoPasseioId);
 
                 if (tipo == null)
                 {
+                    var totalNoBanco = await _context.TiposPasseios.CountAsync();
                     response.Status = false;
                     response.Messagem = "Tipo de passeio não encontrado.";
                     return response;
@@ -232,6 +247,13 @@ namespace petgo_api.Services.Passeios
                 FotoPasseadorUrl = passeio.Passeador?.FotoUrl,
                 FotoPetUrl = passeio.Pet?.FotoUrl
             };
+        }
+
+        private ApiResponse<PasseioResponseDto> RespostaErro(ApiResponse<PasseioResponseDto> resp, string msg)
+        {
+            resp.Status = false;
+            resp.Messagem = msg;
+            return resp;
         }
 
     }

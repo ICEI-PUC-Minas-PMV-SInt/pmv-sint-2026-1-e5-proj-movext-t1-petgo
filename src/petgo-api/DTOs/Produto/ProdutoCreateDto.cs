@@ -19,7 +19,7 @@ namespace petgo_api.DTOs.Produto
         [Required(ErrorMessage = "A quantidade em estoque é obrigatória.")]
         public int Estoque { get; set; }
 
-        public string? FotoUrl { get; set; }
+        public string FotoUrl { get; set; }
 
         public string Categoria { get; set; } = "Geral";
     }

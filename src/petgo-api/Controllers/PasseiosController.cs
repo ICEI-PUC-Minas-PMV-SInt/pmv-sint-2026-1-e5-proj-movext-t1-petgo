@@ -86,7 +86,7 @@ namespace petgo_api.Controllers
         }
 
         [HttpPatch("cancelar-passeio/{id}")]
-        public async Task<ActionResult<ApiResponse<bool>>> CancelarPasseio(Guid id, StatusPasseio novoStatus)
+        public async Task<ActionResult<ApiResponse<bool>>> CancelarPasseio(Guid id)
         {
             var response = await _passeioInterface.CancelarPasseio(id, GetUsuarioLogadoId(), GetUsuarioLogadoTipo());
 

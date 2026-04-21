@@ -10,6 +10,7 @@ using petgo_api.Services.Adocoes;
 using petgo_api.Services.Produtos;
 using petgo_api.Services.Pedidos;
 using petgo_api.Services.Passeios;
+using petgo_api.Services.TiposPasseios;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,7 @@ builder.Services.AddScoped<IAdocaoInterface, AdocaoService>();
 builder.Services.AddScoped<IProdutoInterface, ProdutoService>();
 builder.Services.AddScoped<IPedidoInterface, PedidoService>();
 builder.Services.AddScoped<IPasseioInterface, PasseioService>();
+builder.Services.AddScoped<ITipoPasseioInterface, TipoPasseioService>();
 
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
