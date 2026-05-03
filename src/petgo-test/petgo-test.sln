@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "petgo-test", "petgo-test.csproj", "{DCBE5A84-9357-60C7-A459-054F4E1F4ED8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DCBE5A84-9357-60C7-A459-054F4E1F4ED8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCBE5A84-9357-60C7-A459-054F4E1F4ED8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCBE5A84-9357-60C7-A459-054F4E1F4ED8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCBE5A84-9357-60C7-A459-054F4E1F4ED8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4E76A109-E712-4481-8FC9-6052D11E3370}
+	EndGlobalSection
+EndGlobal
