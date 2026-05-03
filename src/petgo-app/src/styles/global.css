@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@theme {
+  --font-regular: regular;
+  --font-bold: extraBold;
+}
