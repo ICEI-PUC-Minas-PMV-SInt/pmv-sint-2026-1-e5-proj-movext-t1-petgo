@@ -15,8 +15,13 @@ namespace petgo_api.DTOs.Passeio
         public Guid TutorId { get; set; }
         public string NomePet { get; set; }
         public string NomePasseador { get; set; }
+        public string NomeTutor { get; set; }
         public string NomeTipoPasseio { get; set; }
         public string FotoPetUrl { get; set; }
         public string FotoPasseadorUrl { get; set; }
+        public string TelefoneTutor { get; set; }
+        public string EmailTutor { get; set; }
+        public string TelefonePasseador { get; set; }
+        public string EmailPasseador { get; set; }
     }
 }

@@ -10,5 +10,7 @@ namespace petgo_api.DTOs.Produto
         public int Estoque { get; set; }
         public string FotoUrl { get; set; }
         public string Categoria { get; set; } = "Geral";
+        public string? OngId { get; set; }
+        public string? NomeOng { get; set; }
     }
 }

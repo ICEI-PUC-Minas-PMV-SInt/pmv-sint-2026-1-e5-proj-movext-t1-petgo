@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-const MEU_IP_COMPUTADOR = '192.168.0.100';
+const MEU_IP_COMPUTADOR = '192.168.0.107';
 const PORTA_API = '5085';
 
 export const api = axios.create({

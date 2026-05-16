@@ -10,6 +10,7 @@ namespace petgo_api.Services.Pedidos
         Task<ApiResponse<PedidoResponseDto>> ConfirmarPagamentoSimulado(Guid pedidoId, Guid usuarioLogadoId);
         Task<ApiResponse<PedidoResponseDto>> GetPedidoById(Guid pedidoId, Guid usuarioLogadoId);
         Task<ApiResponse<List<PedidoResponseDto>>> ListarPedidos(Guid usuarioLogadoId);
+        Task<ApiResponse<List<PedidoResponseDto>>> ListarVendas(Guid usuarioLogadoId);
         Task<ApiResponse<PedidoResponseDto>> AtualizarStatus(Guid pedidoId, StatusPedido novoStatus, Guid usuarioLogadoId);
         Task<ApiResponse<bool>> CancelarPedido(Guid pedidoId, Guid usuarioLogadoId);
     }

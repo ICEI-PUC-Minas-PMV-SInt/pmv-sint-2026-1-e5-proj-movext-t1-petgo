@@ -29,6 +29,7 @@ namespace petgo_api.Services.Passeios
                 var passeio = await _context.Passeios
                                             .Include(p => p.Pet)
                                             .Include(p => p.Passeador)
+                                            .Include(p => p.Tutor)
                                             .Include(p => p.TipoPasseio)
                                             .FirstOrDefaultAsync(p => p.Id == passeioId);
 
@@ -39,8 +40,8 @@ namespace petgo_api.Services.Passeios
                     return response;
                 }
 
-                bool isTutor = tipoUsuario == TipoUsuario.Adotante && passeio.TutorId == usuarioLogadoId;
-                bool isPasseador = tipoUsuario == TipoUsuario.Passeador && passeio.PasseadorId == usuarioLogadoId;
+                bool isTutor = (tipoUsuario == TipoUsuario.Adotante || tipoUsuario == TipoUsuario.Ong) && passeio.TutorId == usuarioLogadoId;
+                bool isPasseador = (tipoUsuario == TipoUsuario.Passeador || tipoUsuario == TipoUsuario.Ong) && passeio.PasseadorId == usuarioLogadoId;
                 bool isAdmin = tipoUsuario == TipoUsuario.Admin;
 
                 if (!isTutor && !isPasseador && !isAdmin)
@@ -61,6 +62,21 @@ namespace petgo_api.Services.Passeios
                     return RespostaErro(response, "Este passeio já foi finalizado e não pode mais ser alterado.");
 
                 passeio.Status = statusPasseio;
+
+                // Atualizar status do Pet vinculado
+                if (passeio.Pet != null)
+                {
+                    if (statusPasseio == StatusPasseio.EmAndamento)
+                    {
+                        passeio.Pet.Status = StatusPet.EmPasseio;
+                    }
+                    else if (statusPasseio == StatusPasseio.Concluido || statusPasseio == StatusPasseio.Cancelado)
+                    {
+                        // Quando conclui ou cancela, o pet volta a ficar disponível para passeio
+                        passeio.Pet.Status = StatusPet.DisponivelPasseio;
+                    }
+                    _context.Pets.Update(passeio.Pet);
+                }
 
                 _context.Passeios.Update(passeio);
                 await _context.SaveChangesAsync();
@@ -127,6 +143,7 @@ namespace petgo_api.Services.Passeios
                 var passeioCompleto = await _context.Passeios
                                             .Include(p => p.Pet)
                                             .Include(p => p.Passeador)
+                                            .Include(p => p.Tutor)
                                             .Include(p => p.TipoPasseio)
                                             .FirstOrDefaultAsync(p => p.Id == novoPasseio.Id);
 
@@ -151,6 +168,7 @@ namespace petgo_api.Services.Passeios
                 var passeios = await _context.Passeios
                                             .Include(p => p.Pet)
                                             .Include(p => p.Passeador)
+                                            .Include(p => p.Tutor)
                                             .Include(p => p.TipoPasseio)
                                             .Where(p => p.PasseadorId == usuarioLogadoId)
                                             .OrderByDescending(p => p.DataHoraPasseio)
@@ -176,6 +194,7 @@ namespace petgo_api.Services.Passeios
                 var passeios = await _context.Passeios
                                             .Include(p => p.Pet)
                                             .Include(p => p.Passeador)
+                                            .Include(p => p.Tutor)
                                             .Include(p => p.TipoPasseio)
                                             .Where(p => p.TutorId == usuarioLogadoId)
                                             .OrderByDescending(p => p.DataHoraPasseio)
@@ -200,6 +219,7 @@ namespace petgo_api.Services.Passeios
                 var passeio = await _context.Passeios
                                             .Include(p => p.Pet)
                                             .Include(p => p.Passeador)
+                                            .Include(p => p.Tutor)
                                             .Include(p => p.TipoPasseio)
                                             .FirstOrDefaultAsync(p => p.Id == passeioId);
 
@@ -242,10 +262,15 @@ namespace petgo_api.Services.Passeios
                 DescricaoPasseio = passeio.DescricaoPasseio,
                 NomePasseador = passeio.Passeador?.Nome ?? "N/A",
                 NomePet = passeio.Pet?.Nome ?? "N/A",
+                NomeTutor = passeio.Tutor?.Nome ?? "N/A",
                 TutorId = passeio.TutorId,
                 NomeTipoPasseio = passeio.TipoPasseio?.Nome ?? "N/A",
                 FotoPasseadorUrl = passeio.Passeador?.FotoUrl,
-                FotoPetUrl = passeio.Pet?.FotoUrl
+                FotoPetUrl = passeio.Pet?.FotoUrl,
+                TelefoneTutor = passeio.Tutor?.Telefone,
+                EmailTutor = passeio.Tutor?.Email,
+                TelefonePasseador = passeio.Passeador?.Telefone,
+                EmailPasseador = passeio.Passeador?.Email
             };
         }
 

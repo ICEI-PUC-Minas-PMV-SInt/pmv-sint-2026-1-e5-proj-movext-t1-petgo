@@ -123,9 +123,16 @@ namespace petgo_api.Services.Pets
                 pet.Nome = !string.IsNullOrWhiteSpace(petUpdate.Nome) ? petUpdate.Nome : pet.Nome;
                 pet.Descricao = !string.IsNullOrWhiteSpace(petUpdate.Descricao) ? petUpdate.Descricao : pet.Descricao;
                 pet.FotoUrl = !string.IsNullOrWhiteSpace(petUpdate.FotoUrl) ? petUpdate.FotoUrl : pet.FotoUrl;
+                pet.Sexo = petUpdate.Sexo;
+                pet.Porte = petUpdate.Porte;
                 if (petUpdate.Idade > 0)
                 {
                     pet.Idade = petUpdate.Idade;
+                }
+
+                if (!string.IsNullOrEmpty(petUpdate.Status) && Enum.TryParse<StatusPet>(petUpdate.Status, out var novoStatus))
+                {
+                    pet.Status = novoStatus;
                 }
 
                 _context.Update(pet);
@@ -214,17 +221,46 @@ namespace petgo_api.Services.Pets
 
             try
             {
+                // Removemos o Include para evitar erro se a relação estiver inconsistente
                 var pets = await _context.Pets
-                                    .Include(p => p.Usuario)
                                     .Where(p => p.UsuarioId == idUsuario)
                                     .ToListAsync();
-                response.Dados = pets.Select(p => MapToDto(p)).ToList();
+                
+                var listaDtos = new List<PetResponseDto>();
+
+                foreach(var p in pets)
+                {
+                    try 
+                    {
+                        // Tenta carregar o usuário manualmente apenas para este pet se necessário
+                        // Mas não trava se falhar
+                        if (p.Usuario == null)
+                        {
+                            p.Usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == p.UsuarioId);
+                        }
+                        
+                        listaDtos.Add(MapToDto(p));
+                    }
+                    catch 
+                    {
+                        listaDtos.Add(new PetResponseDto {
+                            Id = p.Id,
+                            Nome = p.Nome ?? "Pet (Dados Incompletos)",
+                            Status = p.Status.ToString(),
+                            UsuarioId = p.UsuarioId,
+                            NomeDono = "N/A",
+                            TipoDono = "N/A"
+                        });
+                    }
+                }
+
+                response.Dados = listaDtos;
                 response.Messagem = pets.Any() ? "Seus pets foram carregados!" : "Você ainda não cadastrou nenhum pet.";
             }
             catch (Exception ex)
             {
                 response.Status = false;
-                response.Messagem = ex.Message;
+                response.Messagem = $"Erro crítico ao recuperar pets: {ex.Message}";
             }
 
             return response;
@@ -252,16 +288,21 @@ namespace petgo_api.Services.Pets
 
         private static PetResponseDto MapToDto(Pet p)
         {
+            if (p == null) return new PetResponseDto();
+
             return new PetResponseDto
             {
                 Id = p.Id,
-                Nome = p.Nome,
+                Nome = p.Nome ?? "Sem Nome",
                 Especie = p.Especie.ToString(),
-                Raca = p.Raca,
+                Raca = p.Raca ?? "Vira-lata",
                 Idade = p.Idade,
                 Status = p.Status.ToString(),
-                Descricao = p.Descricao,
-                FotoUrl = p.FotoUrl,
+                Descricao = p.Descricao ?? "",
+                FotoUrl = p.FotoUrl ?? "",
+                Sexo = p.Sexo.ToString(),
+                Porte = p.Porte.ToString(),
+                Saude = p.Saude ?? "N/A",
                 UsuarioId = p.UsuarioId,
                 NomeDono = p.Usuario?.Nome ?? "N/A",
                 TipoDono = p.Usuario?.Tipo.ToString() ?? "N/A",

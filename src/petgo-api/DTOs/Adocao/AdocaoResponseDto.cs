@@ -11,5 +11,12 @@ namespace petgo_api.DTOs.Adocao
         public Guid AdotanteId { get; set; }
         public string NomeAdotante { get; set; }
         public string EmailAdotante { get; set; }
+        public string TelefoneAdotante { get; set; }
+        public string FotoAdotanteUrl { get; set; }
+        // Doador (dono do pet)
+        public string NomeDoador { get; set; }
+        public string EmailDoador { get; set; }
+        public string TelefoneDoador { get; set; }
+        public string FotoDoadorUrl { get; set; }
     }
 }

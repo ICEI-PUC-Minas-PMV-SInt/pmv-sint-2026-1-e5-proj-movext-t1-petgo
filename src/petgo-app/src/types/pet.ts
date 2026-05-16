@@ -7,6 +7,9 @@ export interface PetResponseDto {
     status: string;
     descricao: string;
     fotoUrl: string | null;
+    sexo: string;
+    porte: string;
+    saude: string;
     usuarioId: string;
     nomeDono: string;
     tipoDono: string;
@@ -21,6 +24,8 @@ export interface PetCreateDto {
     status: number;
     descricao: string;
     fotoUrl?: string;
+    sexo: number;
+    porte: number;
     usuarioId?: string;
 }
 
@@ -29,6 +34,10 @@ export interface PetUpdateDto {
     descricao?: string;
     fotoUrl?: string;
     idade?: number;
+    sexo?: number;
+    porte?: number;
+    saude?: string;
+    status?: string;
 }
 
 export interface PetStatusUpdateDto {

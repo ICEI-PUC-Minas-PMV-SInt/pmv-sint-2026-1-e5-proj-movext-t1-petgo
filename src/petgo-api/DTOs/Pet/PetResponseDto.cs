@@ -12,6 +12,9 @@ namespace petgo_api.DTOs.Pet
         public string Status { get; set; }
         public string Descricao { get; set; }
         public string FotoUrl { get; set; }
+        public string Sexo { get; set; }
+        public string Porte { get; set; }
+        public string Saude { get; set; }
 
         public Guid UsuarioId { get; set; }
         public string NomeDono { get; set; }

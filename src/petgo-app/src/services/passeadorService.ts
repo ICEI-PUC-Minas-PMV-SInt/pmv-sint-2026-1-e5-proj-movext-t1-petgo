@@ -1,5 +1,5 @@
+import { PasseadorServicoCreateDto, PasseadorServicoResponseDto } from '../types/passeador';
 import { ApiResponse } from '../types/usuario';
-import { PasseadorServicoResponseDto, PasseadorServicoCreateDto } from '../types/passeadorServico';
 import { api } from './api';
 
 export const passeadorServicoService = {

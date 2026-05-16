@@ -2,12 +2,13 @@ import { authService } from "@/src/services/authService";
 import { usuarioService } from "@/src/services/usuarioService";
 import { UsuarioResponseDto } from "@/src/types/usuario";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -46,6 +47,8 @@ export default function Perfil() {
   const [telefone, setTelefone] = useState("");
   const [endereco, setEndereco] = useState("");
   const [foco, setFoco] = useState<string | null>(null);
+  const [fotoLocal, setFotoLocal] = useState(""); // URI local para exibição imediata
+  const [fotoBase64, setFotoBase64] = useState(""); // base64 para enviar ao servidor
 
   const carregarPerfil = async () => {
     try {
@@ -53,7 +56,6 @@ export default function Perfil() {
       const userId = await authService.obterUserId();
       
       if (!userId) {
-        console.warn("Usuário não identificado, redirecionando...");
         router.replace("/(auth)/login");
         return;
       }
@@ -65,14 +67,14 @@ export default function Perfil() {
         setEmail(dados.email);
         setTelefone(maskPhone(dados.telefone));
         setEndereco(dados.endereco || "");
+        setFotoLocal(dados.fotoUrl || ""); // Carrega foto existente
       } else {
         Alert.alert("Sessão Expirada", "Sua conta não foi encontrada. Faça login novamente.");
         await authService.logout();
         router.replace("/(auth)/login");
       }
     } catch (error) {
-      console.error("Erro ao carregar perfil:", error);
-      Alert.alert("Erro", "Não foi possível carregar seus dados. Verifique sua conexão.");
+      Alert.alert("Erro", "Não foi possível carregar seus dados.");
     } finally {
       setLoading(false);
     }
@@ -81,6 +83,30 @@ export default function Perfil() {
   useEffect(() => {
     carregarPerfil();
   }, []);
+
+  const handlePickFoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permissão Necessária", "Precisamos de acesso às suas fotos.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.4,
+      base64: true,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      const asset = result.assets[0];
+      setFotoLocal(asset.uri); // Exibe imediatamente
+      if (asset.base64) {
+        setFotoBase64(`data:image/jpeg;base64,${asset.base64}`);
+      }
+    }
+  };
 
   const handleUpdate = async () => {
     if (!nome || !email || !telefone) {
@@ -98,10 +124,12 @@ export default function Perfil() {
         email,
         telefone: telefone.replace(/\D/g, ""),
         endereco,
-        fotoUrl: perfil?.fotoUrl || undefined
+        fotoUrl: fotoBase64 || perfil?.fotoUrl || undefined
       });
 
       setPerfil(updated);
+      setFotoLocal(updated.fotoUrl || fotoLocal);
+      setFotoBase64(""); // Limpa o base64 após salvar
       setTelefone(maskPhone(updated.telefone));
       Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
     } catch (error: any) {
@@ -158,23 +186,35 @@ export default function Perfil() {
 
           <View className="items-center mb-10">
             <View className="relative">
-              <View className="w-32 h-32 rounded-full bg-gray-100 items-center justify-center border-4 border-white shadow-sm overflow-hidden">
-                {perfil?.fotoUrl ? (
-                  <Image source={{ uri: perfil.fotoUrl }} className="w-full h-full" />
-                ) : (
-                  <Feather name="user" size={60} color="#D1D5DB" />
-                )}
-              </View>
-              <TouchableOpacity className="absolute bottom-0 right-0 bg-[#4876A8] p-2.5 rounded-full border-4 border-white">
-                <Feather name="camera" size={16} color="white" />
+              <TouchableOpacity onPress={handlePickFoto} activeOpacity={0.85}>
+                <View className="w-32 h-32 rounded-full bg-gray-100 items-center justify-center border-4 border-white shadow-md overflow-hidden">
+                  {fotoLocal ? (
+                    <Image source={{ uri: fotoLocal }} className="w-full h-full" contentFit="cover" />
+                  ) : (
+                    <View className="items-center">
+                      <Feather name="user" size={52} color="#D1D5DB" />
+                    </View>
+                  )}
+                </View>
+                <View className="absolute bottom-0 right-0 bg-[#4876A8] p-2.5 rounded-full border-4 border-white shadow-sm">
+                  <Feather name="camera" size={16} color="white" />
+                </View>
               </TouchableOpacity>
             </View>
             <Text className="text-xl font-bold text-gray-900 mt-4">{perfil?.nome}</Text>
-            <View className="bg-blue-50 px-4 py-1 rounded-full mt-1">
-              <Text className="text-[#4876A8] text-xs font-bold uppercase tracking-wider">
-                {perfil?.tipo === "Adotante" ? "Usuário" : perfil?.tipo}
-              </Text>
-            </View>
+            {fotoBase64 ? (
+              <View className="bg-orange-50 px-4 py-1 rounded-full mt-1 border border-orange-100">
+                <Text className="text-orange-500 text-xs font-bold uppercase tracking-wider">
+                  Nova foto — salve para confirmar
+                </Text>
+              </View>
+            ) : (
+              <View className="bg-blue-50 px-4 py-1 rounded-full mt-1">
+                <Text className="text-[#4876A8] text-xs font-bold uppercase tracking-wider">
+                  {perfil?.tipo === "Adotante" ? "Usuário" : perfil?.tipo}
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Quick Actions */}
@@ -193,23 +233,6 @@ export default function Perfil() {
               </View>
               <Feather name="chevron-right" size={20} color="#4876A8" />
             </TouchableOpacity>
-
-            {perfil?.tipo === "Passeador" && (
-              <TouchableOpacity 
-                onPress={() => router.push("/servicos" as any)}
-                activeOpacity={0.8}
-                className="bg-orange-50 p-6 rounded-[32px] flex-row items-center border border-orange-100 shadow-sm"
-              >
-                <View className="bg-white p-3 rounded-2xl mr-4">
-                  <MaterialCommunityIcons name="dog-service" size={28} color="#F97316" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-orange-700 font-black text-lg">Meus Serviços</Text>
-                  <Text className="text-orange-400 text-xs font-semibold">Configurar preços e tipos</Text>
-                </View>
-                <Feather name="chevron-right" size={20} color="#F97316" />
-              </TouchableOpacity>
-            )}
           </View>
 
           <View className="bg-gray-50/50 p-6 rounded-[32px] border border-gray-100">

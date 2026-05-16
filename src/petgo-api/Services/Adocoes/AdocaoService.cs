@@ -43,7 +43,27 @@ namespace petgo_api.Services.Adocoes
 
                 if (adocaoStatusUpdate.NovoStatus == StatusAdocao.Aprovado)
                 {
+                    if (adocao.Pet.Status == StatusPet.Adotado)
+                    {
+                        response.Status = false;
+                        response.Messagem = "Este pet já foi adotado por outra pessoa.";
+                        return response;
+                    }
+
                     adocao.Pet.Status = StatusPet.Adotado;
+                    adocao.Pet.UsuarioId = adocao.AdotanteId; // Transfer ownership to the adopter
+                    
+                    // Recusar outras solicitações pendentes para este pet
+                    var outrasSolicitacoes = await _context.Adocoes
+                        .Where(a => a.PetId == adocao.PetId && a.Id != adocaoId && (a.Status == StatusAdocao.Pendente || a.Status == StatusAdocao.EmAnalise))
+                        .ToListAsync();
+
+                    foreach (var solicitacao in outrasSolicitacoes)
+                    {
+                        solicitacao.Status = StatusAdocao.Recusado;
+                    }
+
+                    _context.Pets.Update(adocao.Pet);
                 }
 
                 _context.Update(adocao);
@@ -134,6 +154,7 @@ namespace petgo_api.Services.Adocoes
                 var solicitacoes = await _context.Adocoes
                                             .Include(a => a.Adotante)
                                             .Include(a => a.Pet)
+                                                .ThenInclude(p => p.Usuario)
                                             .Where(a => a.Pet.UsuarioId == usuarioLogadoId)
                                             .OrderByDescending(a => a.DataSolicitacao)
                                             .ToListAsync();
@@ -234,13 +255,21 @@ namespace petgo_api.Services.Adocoes
             {
                 Id = adocao.Id,
                 PetId = adocao.PetId,
-                FotoPetUrl = adocao.Pet.FotoUrl,
-                NomePet = adocao.Pet.Nome,
-                AdotanteId = adocao.AdotanteId,
-                NomeAdotante = adocao.Adotante.Nome,
-                EmailAdotante = adocao.Adotante.Email,
+                FotoPetUrl = adocao.Pet?.FotoUrl,
+                NomePet = adocao.Pet?.Nome,
                 DataSolicitacao = adocao.DataSolicitacao,
                 Status = adocao.Status.ToString(),
+                // Adotante
+                AdotanteId = adocao.AdotanteId,
+                NomeAdotante = adocao.Adotante?.Nome,
+                EmailAdotante = adocao.Adotante?.Email,
+                TelefoneAdotante = adocao.Adotante?.Telefone,
+                FotoAdotanteUrl = adocao.Adotante?.FotoUrl,
+                // Doador (dono original do pet)
+                NomeDoador = adocao.Pet?.Usuario?.Nome,
+                EmailDoador = adocao.Pet?.Usuario?.Email,
+                TelefoneDoador = adocao.Pet?.Usuario?.Telefone,
+                FotoDoadorUrl = adocao.Pet?.Usuario?.FotoUrl,
             };
         }
     }

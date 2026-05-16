@@ -30,6 +30,9 @@ namespace petgo_api.Models
         public string Categoria { get; set; } = "Geral";
 
         public DateTime DataCadastro { get; set; } = DateTime.UtcNow;
+        
+        public Guid? UsuarioId { get; set; }
+        public virtual Usuario Usuario { get; set; }
 
         public virtual ICollection<ItemPedido> ItensPedido { get; set; } = new List<ItemPedido>();
     }

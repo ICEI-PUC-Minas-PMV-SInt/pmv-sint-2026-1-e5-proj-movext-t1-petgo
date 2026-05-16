@@ -13,16 +13,19 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Especie, Pet, petService, StatusPet } from "../../services/petService";
+import * as ImagePicker from "expo-image-picker";
+import { Image } from "expo-image";
+import { Especie, petService, StatusPet } from "../../services/petService";
+import { PetResponseDto } from "../../types/pet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function MeusPets() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [pets, setPets] = useState<Pet[]>([]);
+  const [pets, setPets] = useState<PetResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingPet, setEditingPet] = useState<Pet | null>(null);
+  const [editingPet, setEditingPet] = useState<PetResponseDto | null>(null);
 
   // Form states
   const [nome, setNome] = useState("");
@@ -30,6 +33,8 @@ export default function MeusPets() {
   const [raca, setRaca] = useState("");
   const [idade, setIdade] = useState("");
   const [descricao, setDescricao] = useState("");
+  const [fotoUrl, setFotoUrl] = useState("");
+  const [fotoLocal, setFotoLocal] = useState(""); // URI local para exibição
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -48,7 +53,7 @@ export default function MeusPets() {
     }
   };
 
-  const handleOpenModal = (pet?: Pet) => {
+  const handleOpenModal = (pet?: PetResponseDto) => {
     if (pet) {
       setEditingPet(pet);
       setNome(pet.nome);
@@ -56,6 +61,8 @@ export default function MeusPets() {
       setRaca(pet.raca);
       setIdade(pet.idade.toString());
       setDescricao(pet.descricao || "");
+      setFotoUrl(pet.fotoUrl || "");
+      setFotoLocal(pet.fotoUrl || ""); // Carrega a URL existente para exibição
     } else {
       setEditingPet(null);
       resetForm();
@@ -77,9 +84,11 @@ export default function MeusPets() {
         especie,
         raca,
         idade: parseInt(idade),
-        status: editingPet ? editingPet.status : StatusPet.DisponivelPasseio,
         descricao,
-        fotoUrl: editingPet ? editingPet.fotoUrl : "", 
+        fotoUrl: fotoUrl,
+        sexo: especie === Especie.Cachorro ? 0 : 1, // Defaulting if not in form yet
+        porte: 1, // Médio default
+        saude: "N/A"
       };
 
       if (editingPet) {
@@ -106,6 +115,8 @@ export default function MeusPets() {
     setRaca("");
     setIdade("");
     setDescricao("");
+    setFotoUrl("");
+    setFotoLocal("");
     setEditingPet(null);
   };
 
@@ -127,6 +138,54 @@ export default function MeusPets() {
     ]);
   };
 
+  const handleToggleAdocao = async (pet: PetResponseDto) => {
+    const isAdocao = pet.status === "DisponivelAdocao" || pet.status === "1";
+    const novoStatus = isAdocao ? 0 : 1; // 0=DisponivelPasseio, 1=DisponivelAdocao
+
+    Alert.alert(
+        isAdocao ? "Remover de Adoção" : "Colocar para Adoção",
+        isAdocao ? "Deseja remover este pet da lista de doações?" : "Deseja colocar este pet disponível para adoção?",
+        [
+            { text: "Cancelar", style: "cancel" },
+            { text: "Confirmar", onPress: async () => {
+                try {
+                    await petService.alterarStatus(pet.id, novoStatus);
+                    carregarPets();
+                    Alert.alert("Sucesso", isAdocao ? "Pet removido da adoção." : "Pet agora está disponível para adoção!");
+                } catch (error) {
+                    Alert.alert("Erro", "Não foi possível alterar o status.");
+                }
+            }}
+        ]
+    );
+  };
+
+  const handlePickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert("Permissão Necessária", "Precisamos de acesso às suas fotos para continuar.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.3,
+      base64: true,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      const asset = result.assets[0];
+      setFotoLocal(asset.uri); // URI local para exibir na tela (sempre funciona)
+      if (asset.base64) {
+        setFotoUrl(`data:image/jpeg;base64,${asset.base64}`); // base64 para enviar ao servidor
+      } else {
+        setFotoUrl(asset.uri);
+      }
+    }
+  };
+
   const getStatusBadge = (status: StatusPet) => {
     switch (status) {
       case StatusPet.DisponivelPasseio:
@@ -142,18 +201,27 @@ export default function MeusPets() {
     }
   };
 
-  const renderPetItem = ({ item }: { item: Pet }) => {
+  const renderPetItem = ({ item }: { item: PetResponseDto }) => {
     const badge = getStatusBadge(item.status);
 
     return (
       <View className="bg-white p-5 rounded-[32px] mb-4 shadow-sm border border-gray-100">
         <View className="flex-row items-center">
-          <View className="w-16 h-16 rounded-2xl bg-blue-50 items-center justify-center mr-4">
-              <MaterialCommunityIcons 
-                name={item.especie === Especie.Cachorro ? "dog" : item.especie === Especie.Gato ? "cat" : "paw"} 
-                size={32} 
-                color="#4876A8" 
-              />
+          <View style={{ width: 64, height: 64 }} className="rounded-2xl bg-gray-50 items-center justify-center mr-4 overflow-hidden border border-gray-100">
+              {(item.fotoUrl && item.fotoUrl.trim() !== "") ? (
+                <Image 
+                  source={item.fotoUrl}
+                  style={{ width: 64, height: 64 }}
+                  contentFit="cover"
+                  transition={200}
+                />
+              ) : (
+                <MaterialCommunityIcons 
+                    name={item.especie === "0" || item.especie === "Cachorro" ? "dog" : item.especie === "1" || item.especie === "Gato" ? "cat" : "paw"} 
+                    size={32} 
+                    color="#D1D5DB" 
+                />
+              )}
           </View>
           <View className="flex-1">
               <View className="flex-row items-center">
@@ -253,6 +321,32 @@ export default function MeusPets() {
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+              {/* Foto Selection */}
+              <View className="items-center mb-10">
+                  <TouchableOpacity 
+                    onPress={handlePickImage}
+                    className="w-32 h-32 rounded-3xl bg-gray-50 items-center justify-center border-2 border-dashed border-gray-200 overflow-hidden"
+                  >
+                      {(fotoLocal && fotoLocal.trim() !== "") ? (
+                          <Image 
+                            source={fotoLocal}
+                            style={{ width: 128, height: 128 }}
+                            contentFit="cover"
+                            transition={200}
+                          />
+                      ) : (
+                          <View className="items-center">
+                              <Feather name="camera" size={32} color="#D1D5DB" />
+                              <Text className="text-[10px] font-black text-gray-400 mt-2 uppercase">Adicionar Foto</Text>
+                          </View>
+                      )}
+                  </TouchableOpacity>
+                  {(fotoLocal && fotoLocal.trim() !== "") && (
+                      <TouchableOpacity onPress={() => { setFotoUrl(""); setFotoLocal(""); }} className="mt-3">
+                          <Text className="text-red-500 font-black text-[10px] uppercase tracking-widest">Remover Foto</Text>
+                      </TouchableOpacity>
+                  )}
+              </View>
               <Text className="text-gray-400 text-[10px] font-black mb-3 uppercase tracking-widest ml-4">NOME DO PET</Text>
               <TextInput
                 value={nome}

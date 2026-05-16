@@ -154,6 +154,7 @@ namespace petgo_api.Services.Pedidos
                         Id = Guid.NewGuid(),
                         PedidoId = novoPedido.Id,
                         ProdutoId = produto.Id,
+                        Produto = produto, // Set product navigation property to ensure MapToDto works
                         Quantidade = itemDto.Quantidade,
                         PrecoUnitario = produto.Preco
                     };
@@ -279,6 +280,32 @@ namespace petgo_api.Services.Pedidos
             return response;
         }
 
+        public async Task<ApiResponse<List<PedidoResponseDto>>> ListarVendas(Guid usuarioLogadoId)
+        {
+            var response = new ApiResponse<List<PedidoResponseDto>>();
+
+            try
+            {
+                // Busca pedidos que contenham pelo menos um item do vendedor logado
+                var pedidos = await _context.Pedidos
+                                            .Include(p => p.Itens)
+                                            .ThenInclude(i => i.Produto)
+                                            .Where(p => p.Itens.Any(i => i.Produto.UsuarioId == usuarioLogadoId))
+                                            .OrderByDescending(p => p.DataPedido)
+                                            .ToListAsync();
+
+                response.Dados = pedidos.Select(p => MapToDto(p)).ToList();
+                response.Messagem = "Lista de vendas carregada com sucesso!";
+            }
+            catch (Exception ex)
+            {
+                response.Status = false;
+                response.Messagem = ex.Message;
+            }
+
+            return response;
+        }
+
         private static PedidoResponseDto MapToDto(Pedido pedido)
         {
             return new PedidoResponseDto
@@ -292,6 +319,7 @@ namespace petgo_api.Services.Pedidos
                 {
                     Id = i.Id,
                     ProdutoId = i.ProdutoId,
+                    NomeProduto = !string.IsNullOrEmpty(i.Produto?.Nome) ? i.Produto.Nome : "Produto",
                     Quantidade = i.Quantidade,
                     PrecoUnitario = i.PrecoUnitario
                 }).ToList()

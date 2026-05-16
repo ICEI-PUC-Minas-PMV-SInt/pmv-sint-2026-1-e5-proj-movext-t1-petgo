@@ -1,3 +1,4 @@
+import { PetResponseDto, PetCreateDto } from "../types/pet";
 import { api } from "./api";
 import { authService } from "./authService";
 
@@ -14,40 +15,28 @@ export enum StatusPet {
   EmPasseio = 3
 }
 
-export interface Pet {
-  id: string;
-  nome: string;
-  especie: Especie;
-  raca: string;
-  idade: number;
-  status: StatusPet;
-  descricao: string;
-  fotoUrl: string;
-  usuarioId: string;
-}
-
-export interface PetCreateDto {
-  nome: string;
-  especie: Especie;
-  raca: string;
-  idade: number;
-  status: StatusPet;
-  descricao: string;
-  fotoUrl: string;
-}
-
 export const petService = {
-  listarMeusPets: async (): Promise<Pet[]> => {
+  listarPets: async (): Promise<PetResponseDto[]> => {
     try {
-      const response = await api.get("/pets/meus-pets");
+      const response = await api.get("/pets");
       return response.data.dados || [];
     } catch (error) {
-      console.error("Erro ao listar pets:", error);
+      console.error("Erro ao listar todos os pets:", error);
       throw error;
     }
   },
 
-  criarPet: async (pet: PetCreateDto): Promise<Pet> => {
+  listarMeusPets: async (): Promise<PetResponseDto[]> => {
+    try {
+      const response = await api.get("/pets/meus-pets");
+      return response.data.dados || [];
+    } catch (error) {
+      console.error("Erro ao listar meus pets:", error);
+      throw error;
+    }
+  },
+
+  criarPet: async (pet: PetCreateDto): Promise<PetResponseDto> => {
     try {
       const userId = await authService.obterUserId();
       const response = await api.post("/pets", {
@@ -70,9 +59,9 @@ export const petService = {
     }
   },
 
-  alterarStatus: async (id: string, status: StatusPet): Promise<void> => {
+  alterarStatus: async (id: string, novoStatus: StatusPet): Promise<void> => {
       try {
-          await api.put(`/pets/${id}/status`, { status });
+          await api.put(`/pets/${id}/status`, { novoStatus });
       } catch (error) {
           console.error("Erro ao alterar status do pet:", error);
           throw error;

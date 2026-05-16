@@ -30,7 +30,12 @@ export interface PasseioResponseDto {
     tutorId: string;
     nomePet: string;
     nomePasseador: string;
+    nomeTutor: string;
     nomeTipoPasseio: string;
     fotoPetUrl?: string;
     fotoPasseadorUrl?: string;
+    telefoneTutor?: string;
+    emailTutor?: string;
+    telefonePasseador?: string;
+    emailPasseador?: string;
 }

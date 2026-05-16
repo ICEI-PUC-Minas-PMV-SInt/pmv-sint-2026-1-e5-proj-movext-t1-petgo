@@ -26,8 +26,11 @@ namespace petgo_api.Models
 
         [MaxLength(500)]
         public string Descricao { get; set; } = string.Empty;
-
         public string FotoUrl { get; set; } = string.Empty;
+        
+        public Sexo Sexo { get; set; } = Sexo.Macho;
+        public Porte Porte { get; set; } = Porte.Medio;
+        public string Saude { get; set; } = "Vacinado";
 
         [Required]
         public Guid UsuarioId { get; set; }

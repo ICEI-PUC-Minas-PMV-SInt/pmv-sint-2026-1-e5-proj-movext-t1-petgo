@@ -26,6 +26,13 @@ namespace petgo_api.Controllers
             return Ok(pedidos);
         }
 
+        [HttpGet("minhas-vendas")]
+        public async Task<ActionResult<ApiResponse<List<PedidoResponseDto>>>> ListarVendas()
+        {
+            var vendas = await _pedidoInterface.ListarVendas(GetUsuarioLogadoId());
+            return Ok(vendas);
+        }
+
         [HttpPost]
         public async Task<ActionResult<ApiResponse<PedidoResponseDto>>> CriarPedido(PedidoCreateDto pedidoCreate)
         {

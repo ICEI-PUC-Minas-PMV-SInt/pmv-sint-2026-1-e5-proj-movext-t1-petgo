@@ -42,6 +42,7 @@ namespace petgo_api.Services.Produtos
                     Categoria = produtoCreate.Categoria,
                     FotoUrl = produtoCreate.FotoUrl,
                     Preco = produtoCreate.Preco,
+                    UsuarioId = usuarioLogadoId,
                     DataCadastro = DateTime.UtcNow
                 };
 
@@ -184,7 +185,9 @@ namespace petgo_api.Services.Produtos
                 Preco = produto.Preco,
                 Estoque = produto.Estoque,
                 FotoUrl = produto.FotoUrl,
-                Categoria = produto.Categoria
+                Categoria = produto.Categoria,
+                OngId = produto.UsuarioId?.ToString(),
+                NomeOng = produto.Usuario?.Nome
             };
         }
     }

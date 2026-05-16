@@ -50,3 +50,13 @@ export const maskTime = (value: string) => {
     return value
         .replace(/(\d{2})(\d)/, "$1:$2");
 };
+export const maskCurrency = (value: string) => {
+    value = value.replace(/\D/g, "");
+    if (!value) return "";
+    
+    const floatValue = parseFloat(value) / 100;
+    return floatValue.toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+};
