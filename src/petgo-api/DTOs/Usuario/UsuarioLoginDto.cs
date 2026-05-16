@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace petgo_api.DTOs.Usuario
 {
@@ -9,5 +6,12 @@ namespace petgo_api.DTOs.Usuario
     {
         public string Email { get; set; }
         public string Senha { get; set; }
+    }
+
+    public class LoginResponseDto
+    {
+        public string Token { get; set; } = string.Empty;
+        public Guid UsuarioId { get; set; }
+        public string UsuarioTipo { get; set; } = string.Empty;
     }
 }

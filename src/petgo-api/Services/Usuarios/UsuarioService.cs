@@ -219,9 +219,9 @@ namespace petgo_api.Services.Usuarios
             return response;
         }
 
-        public async Task<ApiResponse<string>> Login(UsuarioLoginDto usuarioLogin)
+        public async Task<ApiResponse<LoginResponseDto>> Login(UsuarioLoginDto usuarioLogin)
         {
-            var response = new ApiResponse<string>();
+            var response = new ApiResponse<LoginResponseDto>();
             try
             {
                 var usuario = await _context.Usuarios
@@ -246,7 +246,12 @@ namespace petgo_api.Services.Usuarios
 
                 string token = CriarToken(usuario);
 
-                response.Dados = token;
+                response.Dados = new LoginResponseDto
+                {
+                    Token = token,
+                    UsuarioId = usuario.Id,
+                    UsuarioTipo = usuario.Tipo.ToString()
+                };
                 response.Messagem = "Usuário logado com sucesso!";
             }
             catch (Exception ex)

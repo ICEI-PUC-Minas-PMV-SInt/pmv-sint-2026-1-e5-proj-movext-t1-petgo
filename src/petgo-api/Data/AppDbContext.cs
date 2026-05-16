@@ -18,6 +18,7 @@ namespace petgo_api.Data
         public DbSet<TipoPasseio> TiposPasseios { get; set; }
         public DbSet<Passeio> Passeios { get; set; }
         public DbSet<Adocao> Adocoes { get; set; }
+        public DbSet<PasseadorServico> PasseadorServicos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

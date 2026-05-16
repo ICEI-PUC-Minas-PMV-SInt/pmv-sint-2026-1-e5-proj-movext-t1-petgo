@@ -78,7 +78,7 @@ namespace petgo_api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<ApiResponse<string>>> Login(UsuarioLoginDto usuarioLogin)
+        public async Task<ActionResult<ApiResponse<LoginResponseDto>>> Login(UsuarioLoginDto usuarioLogin)
         {
             var response = await _usuarioInterface.Login(usuarioLogin);
 

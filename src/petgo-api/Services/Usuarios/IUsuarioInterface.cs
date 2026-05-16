@@ -11,6 +11,6 @@ namespace petgo_api.Services.Usuarios
         Task<ApiResponse<UsuarioResponseDto>> CriarUsuario(UsuarioCreateDto usuario);
         Task<ApiResponse<UsuarioResponseDto>> EditarUsuario(Guid idUsuario, UsuarioUpdateDto usuarioUpdateDto, Guid usuarioLogadoId);
         Task<ApiResponse<bool>> ExcluirUsuario(Guid idUsuario);
-        Task<ApiResponse<string>> Login(UsuarioLoginDto loginDto);
+        Task<ApiResponse<LoginResponseDto>> Login(UsuarioLoginDto loginDto);
     }
 }

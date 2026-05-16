@@ -11,10 +11,19 @@ using petgo_api.Services.Produtos;
 using petgo_api.Services.Pedidos;
 using petgo_api.Services.Passeios;
 using petgo_api.Services.TiposPasseios;
+using petgo_api.Services.PasseadorServicos;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PetGoPolicy", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -31,6 +40,7 @@ builder.Services.AddScoped<IProdutoInterface, ProdutoService>();
 builder.Services.AddScoped<IPedidoInterface, PedidoService>();
 builder.Services.AddScoped<IPasseioInterface, PasseioService>();
 builder.Services.AddScoped<ITipoPasseioInterface, TipoPasseioService>();
+builder.Services.AddScoped<IPasseadorServicoInterface, PasseadorServicoService>();
 
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -60,6 +70,8 @@ builder.Services.AddAuthentication(options =>
 });
 
 var app = builder.Build();
+
+app.UseCors("PetGoPolicy");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

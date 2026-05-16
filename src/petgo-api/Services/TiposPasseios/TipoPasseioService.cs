@@ -33,8 +33,6 @@ namespace petgo_api.Services.TiposPasseios
 
                 response.Dados = MaptoDto(novoTipo);
                 response.Messagem = "Tipo de passeio criado com sucesso!";
-
-
             }
             catch (Exception ex)
             {
@@ -97,7 +95,7 @@ namespace petgo_api.Services.TiposPasseios
                 _context.TiposPasseios.Remove(tipoPasseio);
                 await _context.SaveChangesAsync();
 
-                response.Messagem = "Pedido apagado com sucesso!";
+                response.Messagem = "Tipo de passeio apagado com sucesso!";
             }
             catch (Exception ex)
             {

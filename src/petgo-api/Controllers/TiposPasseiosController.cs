@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using petgo_api.DTOs.Passeio;
@@ -27,7 +23,6 @@ namespace petgo_api.Controllers
         public async Task<ActionResult<ApiResponse<List<TipoPasseioResponseDto>>>> ListarTodos()
         {
             var response = await _tipoPasseioInterface.ListarTodos();
-
             return Ok(response);
         }
 
@@ -49,7 +44,7 @@ namespace petgo_api.Controllers
         {
             if (GetUsuarioLogadoTipo() != TipoUsuario.Admin)
             {
-                return ForbiddenResponse("Apenas administradores podem criar o tipo de serviço.");
+                return ForbiddenResponse("Apenas administradores podem criar tipos de serviços globais.");
             }
 
             var response = await _tipoPasseioInterface.CriarTipoPasseio(tipoPasseioCreate);
@@ -67,7 +62,7 @@ namespace petgo_api.Controllers
         {
             if (GetUsuarioLogadoTipo() != TipoUsuario.Admin)
             {
-                return ForbiddenResponse("Apenas administradores podem editar o tipo de serviço.");
+                return ForbiddenResponse("Apenas administradores podem editar tipos de serviços globais.");
             }
 
             var response = await _tipoPasseioInterface.EditarTipoPasseio(id, tipoEditar);
@@ -85,7 +80,7 @@ namespace petgo_api.Controllers
         {
             if (GetUsuarioLogadoTipo() != TipoUsuario.Admin)
             {
-                return ForbiddenResponse("Apenas administradores podem excluir o tipo de serviço.");
+                return ForbiddenResponse("Apenas administradores podem excluir tipos de serviços globais.");
             }
 
             var response = await _tipoPasseioInterface.ExcluirTipoPasseio(id);
