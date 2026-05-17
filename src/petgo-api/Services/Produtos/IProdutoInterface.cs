@@ -10,5 +10,6 @@ namespace petgo_api.Services.Produtos
         Task<ApiResponse<ProdutoResponseDto>> CriarProduto(ProdutoCreateDto produtoCreate, Guid usuarioLogadoId);
         Task<ApiResponse<ProdutoResponseDto>> EditarProduto(ProdutoCreateDto produtoUpdate, Guid produtoId, Guid usuarioLogadoId);
         Task<ApiResponse<bool>> ExcluirProduto(Guid produtoId, Guid usuarioLogadoId);
+        Task<ApiResponse<List<ProdutoResponseDto>>> ListarMeusProdutos(Guid usuarioId);
     }
 }
