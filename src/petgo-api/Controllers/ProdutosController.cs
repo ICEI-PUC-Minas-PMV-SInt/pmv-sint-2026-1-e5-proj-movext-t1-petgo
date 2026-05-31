@@ -118,6 +118,21 @@ namespace petgo_api.Controllers
             }
 
             return Ok(response);
+        
         }
+
+        [Authorize]
+            [HttpGet("meus-produtos")]
+            public async Task<ActionResult<List<ProdutoResponseDto>>> ListarMeusProdutos()
+            {
+                var response = await _produtoInterface.ListarMeusProdutos(GetUsuarioLogadoId());
+
+                if (!response.Status)
+                {
+                return BadRequest(response);
+                }
+
+                return Ok(response);
+           }
     }
 }

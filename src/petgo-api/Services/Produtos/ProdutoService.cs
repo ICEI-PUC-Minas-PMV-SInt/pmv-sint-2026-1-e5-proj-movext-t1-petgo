@@ -188,6 +188,36 @@ namespace petgo_api.Services.Produtos
 
             return response;
         }
+        public async Task<ApiResponse<List<ProdutoResponseDto>>> ListarMeusProdutos(Guid usuarioId)
+        {
+            var response = new ApiResponse<List<ProdutoResponseDto>>();
+
+            try
+          {
+            var produtos = await _context.Produtos
+           .Where(p => p.UsuarioId == usuarioId)
+            .ToListAsync();
+
+             response.Dados = produtos.Select(p => new ProdutoResponseDto
+            {
+            Id = p.Id,
+            Nome = p.Nome,
+            Descricao = p.Descricao,
+            Preco = p.Preco,
+            FotoUrl = p.FotoUrl
+            }).ToList();
+
+           response.Messagem = "Produtos do usuário encontrados com sucesso!";
+       }
+           catch (Exception ex)
+          {
+           response.Status = false;
+           response.Messagem = ex.Message;
+          }
+
+         return response;
+        }
+        
 
         private static ProdutoResponseDto MapToDto(Produto produto)
         {
