@@ -14,6 +14,6 @@ namespace petgo_api.Services.Adocoes
         // Ver pedidos como dono/ ONG
         Task<ApiResponse<List<AdocaoResponseDto>>> ListarSolicitacoesRecebidas(Guid usuarioLogadoId);
 
-        Task<ApiResponse<AdocaoResponseDto>> GetAdocaoById(Guid adocaoId);
+        Task<ApiResponse<AdocaoResponseDto>> GetAdocaoById(Guid adocaoId, Guid usuarioLogadoId);
     }
 }

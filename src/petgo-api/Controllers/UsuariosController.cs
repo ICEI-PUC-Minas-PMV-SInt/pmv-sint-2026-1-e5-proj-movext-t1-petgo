@@ -16,6 +16,7 @@ namespace petgo_api.Controllers
             _usuarioInterface = usuarioInterface;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<ApiResponse<List<UsuarioResponseDto>>>> ListarUsuarios()
         {
@@ -64,14 +65,15 @@ namespace petgo_api.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> ExcluirUsuario(Guid id)
         {
-            var response = await _usuarioInterface.ExcluirUsuario(id);
+            var response = await _usuarioInterface.ExcluirUsuario(id, GetUsuarioLogadoId());
 
             if (!response.Status)
             {
-                return NotFound(response);
+                return BadRequest(response);
             }
 
             return Ok(response);

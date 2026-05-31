@@ -63,7 +63,7 @@ namespace petgo_api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<AdocaoResponseDto>>> GetAdocaoById(Guid id)
         {
-            var response = await _adocaoInterface.GetAdocaoById(id);
+            var response = await _adocaoInterface.GetAdocaoById(id, GetUsuarioLogadoId());
 
             if (!response.Status)
             {

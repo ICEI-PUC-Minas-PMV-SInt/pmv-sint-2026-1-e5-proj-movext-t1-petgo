@@ -23,6 +23,7 @@ namespace petgo_api.Services.Adocoes
                 var adocao = await _context.Adocoes
                                         .Include(a => a.Adotante)
                                         .Include(a => a.Pet)
+                                            .ThenInclude(p => p.Usuario)
                                         .FirstOrDefaultAsync(a => a.Id == adocaoId);
 
                 if (adocao == null)
@@ -32,13 +33,34 @@ namespace petgo_api.Services.Adocoes
                     return response;
                 }
 
-                if (adocao.Pet.UsuarioId != usuarioLogadoId)
+                bool isDono = adocao.Pet.UsuarioId == usuarioLogadoId;
+                bool isAdotante = adocao.AdotanteId == usuarioLogadoId;
+
+                if (!isDono && !isAdotante)
                 {
                     response.Status = false;
-                    response.Messagem = "Você não tem permissão de aprovar ou recusar esta adoção";
+                    response.Messagem = "Você não tem permissão para alterar esta adoção.";
                     return response;
                 }
 
+                // Adotante só pode confirmar a retirada (Adotado) e apenas quando já aprovada
+                if (isAdotante && !isDono)
+                {
+                    if (adocaoStatusUpdate.NovoStatus != StatusAdocao.Adotado)
+                    {
+                        response.Status = false;
+                        response.Messagem = "Você não tem permissão para esta operação.";
+                        return response;
+                    }
+                    if (adocao.Status != StatusAdocao.Aprovado)
+                    {
+                        response.Status = false;
+                        response.Messagem = "Só é possível confirmar a retirada após a adoção ser aprovada.";
+                        return response;
+                    }
+                }
+
+                var statusAnterior = adocao.Status;
                 adocao.Status = adocaoStatusUpdate.NovoStatus;
 
                 if (adocaoStatusUpdate.NovoStatus == StatusAdocao.Aprovado)
@@ -46,13 +68,13 @@ namespace petgo_api.Services.Adocoes
                     if (adocao.Pet.Status == StatusPet.Adotado)
                     {
                         response.Status = false;
-                        response.Messagem = "Este pet já foi adotado por outra pessoa.";
+                        response.Messagem = "Este pet já está reservado ou foi adotado por outra pessoa.";
                         return response;
                     }
 
+                    // Reservar o pet (some da lista de adoções) sem transferir a posse ainda
                     adocao.Pet.Status = StatusPet.Adotado;
-                    adocao.Pet.UsuarioId = adocao.AdotanteId; // Transfer ownership to the adopter
-                    
+
                     // Recusar outras solicitações pendentes para este pet
                     var outrasSolicitacoes = await _context.Adocoes
                         .Where(a => a.PetId == adocao.PetId && a.Id != adocaoId && (a.Status == StatusAdocao.Pendente || a.Status == StatusAdocao.EmAnalise))
@@ -63,6 +85,18 @@ namespace petgo_api.Services.Adocoes
                         solicitacao.Status = StatusAdocao.Recusado;
                     }
 
+                    _context.Pets.Update(adocao.Pet);
+                }
+                else if (adocaoStatusUpdate.NovoStatus == StatusAdocao.Adotado)
+                {
+                    // Pickup confirmado: transferir posse agora
+                    adocao.Pet.UsuarioId = adocao.AdotanteId;
+                    _context.Pets.Update(adocao.Pet);
+                }
+                else if (adocaoStatusUpdate.NovoStatus == StatusAdocao.Recusado && statusAnterior == StatusAdocao.Aprovado)
+                {
+                    // Adoção cancelada após aprovação: devolver pet à lista de adoções
+                    adocao.Pet.Status = StatusPet.DisponivelAdocao;
                     _context.Pets.Update(adocao.Pet);
                 }
 
@@ -82,7 +116,7 @@ namespace petgo_api.Services.Adocoes
             return response;
         }
 
-        public async Task<ApiResponse<AdocaoResponseDto>> GetAdocaoById(Guid adocaoId)
+        public async Task<ApiResponse<AdocaoResponseDto>> GetAdocaoById(Guid adocaoId, Guid usuarioLogadoId)
         {
             var response = new ApiResponse<AdocaoResponseDto>();
 
@@ -91,12 +125,23 @@ namespace petgo_api.Services.Adocoes
                 var adocao = await _context.Adocoes
                                     .Include(a => a.Adotante)
                                     .Include(a => a.Pet)
+                                        .ThenInclude(p => p.Usuario)
                                     .FirstOrDefaultAsync(a => a.Id == adocaoId);
 
                 if (adocao == null)
                 {
                     response.Status = false;
                     response.Messagem = "Solicitação não encontrada";
+                    return response;
+                }
+
+                bool temAcesso = adocao.AdotanteId == usuarioLogadoId
+                              || adocao.Pet.UsuarioId == usuarioLogadoId;
+
+                if (!temAcesso)
+                {
+                    response.Status = false;
+                    response.Messagem = "Sem permissão para acessar esta adoção.";
                     return response;
                 }
 
@@ -121,6 +166,7 @@ namespace petgo_api.Services.Adocoes
                 var solicitacoes = await _context.Adocoes
                                             .Include(a => a.Adotante)
                                             .Include(a => a.Pet)
+                                                .ThenInclude(p => p.Usuario)
                                             .Where(a => a.AdotanteId == usuarioLogadoId)
                                             .OrderByDescending(a => a.DataSolicitacao)
                                             .ToListAsync();
@@ -204,7 +250,7 @@ namespace petgo_api.Services.Adocoes
                 if (pet.Status == StatusPet.Adotado)
                 {
                     response.Status = false;
-                    response.Messagem = "Este pet já foi adotado!";
+                    response.Messagem = "Este pet já está reservado ou foi adotado.";
                     return response;
                 }
 
@@ -234,6 +280,7 @@ namespace petgo_api.Services.Adocoes
 
                 var adocaoCompleta = await _context.Adocoes
                                             .Include(a => a.Pet)
+                                                .ThenInclude(p => p.Usuario)
                                             .Include(a => a.Adotante)
                                             .FirstOrDefaultAsync(a => a.Id == novaAdocao.Id);
                 response.Dados = MapToDto(adocaoCompleta!);

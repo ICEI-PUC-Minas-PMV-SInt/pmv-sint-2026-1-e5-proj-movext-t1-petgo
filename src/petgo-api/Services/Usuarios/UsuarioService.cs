@@ -108,18 +108,25 @@ namespace petgo_api.Services.Usuarios
             return response;
         }
 
-        public async Task<ApiResponse<bool>> ExcluirUsuario(Guid idUsuario)
+        public async Task<ApiResponse<bool>> ExcluirUsuario(Guid idUsuario, Guid usuarioLogadoId)
         {
             var response = new ApiResponse<bool>();
 
             try
             {
+                if (idUsuario != usuarioLogadoId)
+                {
+                    response.Status = false;
+                    response.Messagem = "Você não tem permissão para excluir este usuário!";
+                    return response;
+                }
+
                 var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == idUsuario);
 
                 if (usuario == null)
                 {
                     response.Status = false;
-                    response.Messagem = " Usuário não encontrado!";
+                    response.Messagem = "Usuário não encontrado!";
                     return response;
                 }
 

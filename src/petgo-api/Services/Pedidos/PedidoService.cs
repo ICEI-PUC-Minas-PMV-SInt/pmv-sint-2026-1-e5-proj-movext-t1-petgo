@@ -235,7 +235,7 @@ namespace petgo_api.Services.Pedidos
                 var pedido = await _context.Pedidos
                                     .Include(p => p.Itens)
                                     .ThenInclude(i => i.Produto)
-                                    .FirstOrDefaultAsync(p => p.Id == pedidoId);
+                                    .FirstOrDefaultAsync(p => p.Id == pedidoId && p.UsuarioId == usuarioLogadoId);
 
                 if (pedido == null)
                 {

@@ -75,6 +75,13 @@ namespace petgo_api.Services.Produtos
                     return response;
                 }
 
+                if (produto.UsuarioId != usuarioLogadoId)
+                {
+                    response.Status = false;
+                    response.Messagem = "Você não tem permissão para modificar este produto.";
+                    return response;
+                }
+
                 produto.Nome = produtoUpdate.Nome;
                 produto.Descricao = produtoUpdate.Descricao;
                 produto.Estoque = produtoUpdate.Estoque;
@@ -109,6 +116,13 @@ namespace petgo_api.Services.Produtos
                 {
                     response.Status = false;
                     response.Messagem = "Produto não encontrado.";
+                    return response;
+                }
+
+                if (produto.UsuarioId != usuarioLogadoId)
+                {
+                    response.Status = false;
+                    response.Messagem = "Você não tem permissão para excluir este produto.";
                     return response;
                 }
 

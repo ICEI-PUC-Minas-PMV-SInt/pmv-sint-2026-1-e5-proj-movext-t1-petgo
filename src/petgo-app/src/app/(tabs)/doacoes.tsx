@@ -220,6 +220,7 @@ export default function Doacoes() {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
+      case "adotado": return "text-purple-600 bg-purple-50 border-purple-100";
       case "aprovado": return "text-green-600 bg-green-50 border-green-100";
       case "recusado": return "text-red-600 bg-red-50 border-red-100";
       case "pendente": return "text-amber-600 bg-amber-50 border-amber-100";
@@ -292,35 +293,45 @@ export default function Doacoes() {
   };
 
   const renderRequestItem = ({ item }: { item: AdocaoResponseDto }) => (
-    <TouchableOpacity 
-      onPress={() => {
-        const pet = petsDisponiveis.find(p => p.id === item.petId);
-        if (pet) setSelectedPet(pet);
-        else Alert.alert("Informação", `Pedido para ${item.nomePet}.\nStatus: ${item.status}\nData: ${new Date(item.dataSolicitacao).toLocaleDateString("pt-BR")}`);
-      }}
-      className="bg-white mx-8 mb-4 p-6 rounded-[35px] border border-gray-50 shadow-lg shadow-gray-200/50 flex-row items-center"
-    >
-      <View className="bg-gray-50 rounded-2xl overflow-hidden mr-4 border border-gray-100" style={{ width: 70, height: 70 }}>
-          <Image 
-            source={ item.fotoPetUrl || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=200" } 
-            style={{ width: '100%', height: '100%' }}
-            contentFit="cover"
-            transition={500}
-          />
-      </View>
-      <View className="flex-1">
-        <View className="flex-row justify-between items-start mb-1">
-            <Text className="text-xl font-black text-gray-900 tracking-tighter">{item.nomePet}</Text>
-            <View className={`px-3 py-1 rounded-full border ${getStatusColor(item.status)}`}>
-                <Text className="text-[9px] font-black uppercase tracking-widest">{item.status}</Text>
-            </View>
+    <View className="bg-white mx-8 mb-4 rounded-[35px] border border-gray-50 shadow-lg shadow-gray-200/50 overflow-hidden">
+      <TouchableOpacity
+        onPress={() => {
+          const pet = petsDisponiveis.find(p => p.id === item.petId);
+          if (pet) setSelectedPet(pet);
+          else Alert.alert("Informação", `Pedido para ${item.nomePet}.\nStatus: ${item.status}\nData: ${new Date(item.dataSolicitacao).toLocaleDateString("pt-BR")}`);
+        }}
+        className="p-6 flex-row items-center"
+      >
+        <View className="bg-gray-50 rounded-2xl overflow-hidden mr-4 border border-gray-100" style={{ width: 70, height: 70 }}>
+            <Image
+              source={ item.fotoPetUrl || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=200" }
+              style={{ width: '100%', height: '100%' }}
+              contentFit="cover"
+              transition={500}
+            />
         </View>
-        <Text className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Solicitado em {new Date(item.dataSolicitacao).toLocaleDateString("pt-BR")}</Text>
-      </View>
-      <View className="bg-gray-50 p-2 rounded-xl ml-2">
-        <Feather name="chevron-right" size={18} color="#D1D5DB" />
-      </View>
-    </TouchableOpacity>
+        <View className="flex-1">
+          <View className="flex-row justify-between items-start mb-1">
+              <Text className="text-xl font-black text-gray-900 tracking-tighter">{item.nomePet}</Text>
+              <View className={`px-3 py-1 rounded-full border ${getStatusColor(item.status)}`}>
+                  <Text className="text-[9px] font-black uppercase tracking-widest">{item.status}</Text>
+              </View>
+          </View>
+          <Text className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Solicitado em {new Date(item.dataSolicitacao).toLocaleDateString("pt-BR")}</Text>
+        </View>
+        <View className="bg-gray-50 p-2 rounded-xl ml-2">
+          <Feather name="chevron-right" size={18} color="#D1D5DB" />
+        </View>
+      </TouchableOpacity>
+      {item.status === "Aprovado" && (
+        <TouchableOpacity
+          onPress={() => handleUpdateAdocaoStatus(item.id, 4)}
+          className="mx-4 mb-4 bg-purple-500 py-4 rounded-2xl items-center shadow-md shadow-purple-900/20"
+        >
+          <Text className="text-white font-black uppercase tracking-widest text-[10px]">Confirmar Retirada do Pet</Text>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 
   return (
@@ -446,7 +457,7 @@ export default function Doacoes() {
                     {(selectedAdocao?.status === "Pendente" || selectedAdocao?.status === "EmAnalise") ? (
                         <View className="gap-y-4">
                             {selectedAdocao?.status === "Pendente" && (
-                                <TouchableOpacity 
+                                <TouchableOpacity
                                     onPress={() => { handleUpdateAdocaoStatus(selectedAdocao.id, 1); setSelectedAdocao(null); }}
                                     className="bg-blue-50 py-5 rounded-3xl items-center border border-blue-100"
                                 >
@@ -454,19 +465,37 @@ export default function Doacoes() {
                                 </TouchableOpacity>
                             )}
                             <View className="flex-row gap-x-4">
-                                <TouchableOpacity 
+                                <TouchableOpacity
                                     onPress={() => { handleUpdateAdocaoStatus(selectedAdocao.id, 3); setSelectedAdocao(null); }}
                                     className="flex-1 bg-red-50 py-5 rounded-3xl items-center border border-red-100"
                                 >
                                     <Text className="text-red-600 font-black uppercase tracking-widest text-[10px]">Recusar</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity 
+                                <TouchableOpacity
                                     onPress={() => { handleUpdateAdocaoStatus(selectedAdocao.id, 2); setSelectedAdocao(null); }}
                                     className="flex-[2] bg-green-500 py-5 rounded-3xl items-center shadow-lg shadow-green-900/20"
                                 >
                                     <Text className="text-white font-black uppercase tracking-widest text-[10px]">Aprovar Adoção</Text>
                                 </TouchableOpacity>
                             </View>
+                        </View>
+                    ) : selectedAdocao?.status === "Aprovado" ? (
+                        <View className="gap-y-4">
+                            <View className="bg-green-50 p-4 rounded-2xl border border-green-100">
+                                <Text className="text-green-700 font-bold text-xs text-center">Adoção aprovada — aguardando retirada do pet pelo adotante.</Text>
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => { handleUpdateAdocaoStatus(selectedAdocao.id, 4); setSelectedAdocao(null); }}
+                                className="bg-purple-500 py-5 rounded-3xl items-center shadow-lg shadow-purple-900/20"
+                            >
+                                <Text className="text-white font-black uppercase tracking-widest text-[10px]">Confirmar Entrega do Pet</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => { handleUpdateAdocaoStatus(selectedAdocao.id, 3); setSelectedAdocao(null); }}
+                                className="bg-red-50 py-5 rounded-3xl items-center border border-red-100"
+                            >
+                                <Text className="text-red-600 font-black uppercase tracking-widest text-[10px]">Cancelar Adoção (Não Buscou)</Text>
+                            </TouchableOpacity>
                         </View>
                     ) : (
                         <View className={`p-5 rounded-3xl items-center border ${getStatusColor(selectedAdocao?.status || "")}`}>
