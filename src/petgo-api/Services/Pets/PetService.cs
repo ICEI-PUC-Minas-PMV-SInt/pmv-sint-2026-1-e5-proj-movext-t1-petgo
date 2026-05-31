@@ -38,6 +38,13 @@ namespace petgo_api.Services.Pets
                     return response;
                 }
 
+                if (usuario.Tipo == TipoUsuario.Ong && pet.UsuarioId != usuarioLogadoId)
+                {
+                    response.Status = false;
+                    response.Messagem = "Você não tem permissão para alterar o status deste pet.";
+                    return response;
+                }
+
                 pet.Status = petStatusUpdate.NovoStatus;
                 await _context.SaveChangesAsync();
 

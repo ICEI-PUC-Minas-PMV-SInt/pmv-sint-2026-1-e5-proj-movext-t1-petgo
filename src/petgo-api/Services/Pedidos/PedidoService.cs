@@ -24,12 +24,24 @@ namespace petgo_api.Services.Pedidos
             {
                 var pedido = await _context.Pedidos
                                         .Include(p => p.Itens)
+                                            .ThenInclude(i => i.Produto)
                                         .FirstOrDefaultAsync(p => p.Id == pedidoId);
 
                 if (pedido == null)
                 {
                     response.Status = false;
                     response.Messagem = "pedido não encontrado.";
+                    return response;
+                }
+
+                var usuario = await _context.Usuarios.FindAsync(usuarioLogadoId);
+                bool isAdmin = usuario?.Tipo == TipoUsuario.Admin;
+                bool temItemNoPedido = pedido.Itens.Any(i => i.Produto?.UsuarioId == usuarioLogadoId);
+
+                if (!isAdmin && !temItemNoPedido)
+                {
+                    response.Status = false;
+                    response.Messagem = "Você não tem permissão para atualizar este pedido.";
                     return response;
                 }
 

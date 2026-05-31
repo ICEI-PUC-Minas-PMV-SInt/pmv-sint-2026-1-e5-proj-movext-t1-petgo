@@ -38,6 +38,7 @@ namespace petgo_api.Controllers
             return CreatedAtAction(nameof(GetUsuarioById), new { id = response.Dados.Id }, response);
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<UsuarioResponseDto>>> GetUsuarioById(Guid id)
         {
@@ -92,6 +93,7 @@ namespace petgo_api.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpGet("pet/{petId}")]
         public async Task<ActionResult<ApiResponse<UsuarioResponseDto>>> GetUsuarioByPetId(Guid petId)
         {
