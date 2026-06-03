@@ -97,7 +97,7 @@ export default function Servicos() {
     if (tipo) {
       setSelectedTipo(tipo);
       // Formata o preço vindo do banco para a máscara (ex: 50 -> "50,00")
-      setPreco(maskCurrency((servico.precoCustomizado * 100).toString()));
+      setPreco(maskCurrency(Math.round(servico.precoCustomizado * 100).toString()));
       setModalPrecoVisible(true);
     }
   };
@@ -116,8 +116,7 @@ export default function Servicos() {
     try {
       setSaving(true);
       
-      // Limpeza ultra-robusta: remove tudo que não for dígito ou vírgula, depois troca vírgula por ponto
-      const precoLimpo = preco.replace(/[^\d,]/g, "").replace(",", ".");
+      const precoLimpo = preco.replace(/\./g, "").replace(",", ".");
       const precoFloat = parseFloat(precoLimpo);
 
       if (isNaN(precoFloat)) {
@@ -133,7 +132,7 @@ export default function Servicos() {
       carregarDados();
       Alert.alert("Sucesso", "Serviço configurado com sucesso!");
     } catch (error: any) {
-      Alert.alert("Erro", error.message || "Não foi possível salvar o preço.");
+      Alert.alert("Erro", error.message || "Não foi possível salvar o preço do serviço.");
     } finally {
       setSaving(false);
     }

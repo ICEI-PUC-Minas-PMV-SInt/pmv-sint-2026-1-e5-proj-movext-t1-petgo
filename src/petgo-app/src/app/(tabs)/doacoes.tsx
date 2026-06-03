@@ -45,6 +45,7 @@ export default function Doacoes() {
   const [loadingMeusPets, setLoadingMeusPets] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [editingPetId, setEditingPetId] = useState<string | null>(null);
   const [selectedAdocao, setSelectedAdocao] = useState<AdocaoResponseDto | null>(null);
 
   const carregarDados = async () => {
@@ -738,116 +739,120 @@ export default function Doacoes() {
                                                 <Text className="text-white text-[8px] font-black uppercase">{pet.status.replace("Disponivel", "").toUpperCase()}</Text>
                                             </View>
                                         </View>
-                                        <View className="gap-y-4">
-                                            <View className="bg-white p-4 rounded-2xl border border-gray-100 mb-2">
-                                                <View className="flex-row justify-between items-center mb-4">
-                                                    <View>
-                                                        <Text className="text-gray-400 text-[9px] font-black uppercase tracking-widest">Status Atual</Text>
-                                                        <Text className={`font-black text-xs ${isAdocao ? "text-orange-600" : (pet.status === "Adotado" ? "text-green-600" : "text-gray-400")}`}>
-                                                            {pet.status === "Adotado" ? "PET JÁ ADOTADO" : (isAdocao ? "DISPONÍVEL PARA ADOÇÃO" : "NÃO DISPONÍVEL PARA ADOÇÃO")}
-                                                        </Text>
+                                        {editingPetId === pet.id ? (
+                                            <View className="gap-y-4 mt-2">
+                                                <View className="flex-row gap-x-3">
+                                                    <View className="flex-1">
+                                                        <Text className="text-gray-400 text-[9px] font-black uppercase ml-1 mb-1">Nome do Pet</Text>
+                                                        <TextInput
+                                                            className="bg-white p-4 rounded-2xl border border-gray-100 text-sm font-bold"
+                                                            defaultValue={pet.nome}
+                                                            onChangeText={(val) => pet.nome = val}
+                                                        />
                                                     </View>
-                                                    {pet.status !== "Adotado" && (
-                                                        <TouchableOpacity 
-                                                            onPress={() => handleToggleAdocaoDirect(pet)}
-                                                            className={`px-4 py-2 rounded-xl ${isAdocao ? "bg-red-50" : "bg-orange-500 shadow-lg shadow-orange-900/20"}`}
-                                                        >
-                                                            <Text className={`text-[10px] font-black uppercase ${isAdocao ? "text-red-500" : "text-white"}`}>
-                                                                {isAdocao ? "Remover" : "Colocar para Adoção"}
-                                                            </Text>
-                                                        </TouchableOpacity>
-                                                    )}
+                                                    <View className="flex-[0.5]">
+                                                        <Text className="text-gray-400 text-[9px] font-black uppercase ml-1 mb-1">Idade</Text>
+                                                        <TextInput
+                                                            keyboardType="numeric"
+                                                            className="bg-white p-4 rounded-2xl border border-gray-100 text-sm font-bold"
+                                                            defaultValue={pet.idade.toString()}
+                                                            onChangeText={(val) => pet.idade = parseInt(val) || 0}
+                                                        />
+                                                    </View>
                                                 </View>
-                                                <Text className="text-[10px] text-gray-400 font-medium leading-4">
-                                                    {isAdocao 
-                                                        ? "Este pet está visível na aba de adoções para outros usuários." 
-                                                        : "Este pet está privado. Clique no botão acima para permitir que outras pessoas o adotem."}
-                                                </Text>
-                                            </View>
-                                            
-                                            <View className="flex-row gap-x-3">
-                                                <View className="flex-1">
-                                                    <Text className="text-gray-400 text-[9px] font-black uppercase ml-1 mb-1">Nome do Pet</Text>
-                                                    <TextInput 
-                                                        className="bg-white p-4 rounded-2xl border border-gray-100 text-sm font-bold" 
-                                                        defaultValue={pet.nome}
-                                                        onChangeText={(val) => pet.nome = val}
-                                                    />
-                                                </View>
-                                                <View className="flex-[0.5]">
-                                                    <Text className="text-gray-400 text-[9px] font-black uppercase ml-1 mb-1">Idade</Text>
-                                                    <TextInput 
-                                                        keyboardType="numeric"
-                                                        className="bg-white p-4 rounded-2xl border border-gray-100 text-sm font-bold" 
-                                                        defaultValue={pet.idade.toString()}
-                                                        onChangeText={(val) => pet.idade = parseInt(val) || 0}
-                                                    />
-                                                </View>
-                                            </View>
 
-                                            <View className="flex-row gap-x-3">
-                                                <View className="flex-1">
-                                                    <Text className="text-gray-400 text-[9px] font-black uppercase ml-1 mb-2">Sexo</Text>
-                                                    <View className="flex-row gap-x-2">
-                                                        <TouchableOpacity 
-                                                            onPress={() => { pet.sexo = "Macho"; setMeusPets([...meusPets]); }}
-                                                            className={`flex-1 py-3 rounded-2xl border ${pet.sexo === "Macho" ? "bg-blue-500 border-blue-500" : "bg-white border-gray-100"}`}
-                                                        >
-                                                            <Text className={`text-center font-bold text-[10px] ${pet.sexo === "Macho" ? "text-white" : "text-gray-400"}`}>Macho</Text>
-                                                        </TouchableOpacity>
-                                                        <TouchableOpacity 
-                                                            onPress={() => { pet.sexo = "Fêmea"; setMeusPets([...meusPets]); }}
-                                                            className={`flex-1 py-3 rounded-2xl border ${pet.sexo === "Fêmea" || pet.sexo === "Femea" ? "bg-pink-500 border-pink-500" : "bg-white border-gray-100"}`}
-                                                        >
-                                                            <Text className={`text-center font-bold text-[10px] ${pet.sexo === "Fêmea" || pet.sexo === "Femea" ? "text-white" : "text-gray-400"}`}>Fêmea</Text>
-                                                        </TouchableOpacity>
-                                                    </View>
-                                                </View>
-                                                <View className="flex-1">
-                                                    <Text className="text-gray-400 text-[9px] font-black uppercase ml-1 mb-2">Porte</Text>
-                                                    <View className="flex-row gap-x-1">
-                                                        {["Pequeno", "Médio", "Grande"].map((p) => (
-                                                            <TouchableOpacity 
-                                                                key={p}
-                                                                onPress={() => { pet.porte = p; setMeusPets([...meusPets]); }}
-                                                                className={`flex-1 py-3 rounded-2xl border ${pet.porte === p || (p === "Médio" && pet.porte === "Medio") ? "bg-[#4876A8] border-[#4876A8]" : "bg-white border-gray-100"}`}
+                                                <View className="flex-row gap-x-3">
+                                                    <View className="flex-1">
+                                                        <Text className="text-gray-400 text-[9px] font-black uppercase ml-1 mb-2">Sexo</Text>
+                                                        <View className="flex-row gap-x-2">
+                                                            <TouchableOpacity
+                                                                onPress={() => { pet.sexo = "Macho"; setMeusPets([...meusPets]); }}
+                                                                className={`flex-1 py-3 rounded-2xl border ${pet.sexo === "Macho" ? "bg-blue-500 border-blue-500" : "bg-white border-gray-100"}`}
                                                             >
-                                                                <Text className={`text-center font-bold text-[8px] ${pet.porte === p || (p === "Médio" && pet.porte === "Medio") ? "text-white" : "text-gray-400"}`}>{p[0]}</Text>
+                                                                <Text className={`text-center font-bold text-[10px] ${pet.sexo === "Macho" ? "text-white" : "text-gray-400"}`}>Macho</Text>
                                                             </TouchableOpacity>
-                                                        ))}
+                                                            <TouchableOpacity
+                                                                onPress={() => { pet.sexo = "Fêmea"; setMeusPets([...meusPets]); }}
+                                                                className={`flex-1 py-3 rounded-2xl border ${pet.sexo === "Fêmea" || pet.sexo === "Femea" ? "bg-pink-500 border-pink-500" : "bg-white border-gray-100"}`}
+                                                            >
+                                                                <Text className={`text-center font-bold text-[10px] ${pet.sexo === "Fêmea" || pet.sexo === "Femea" ? "text-white" : "text-gray-400"}`}>Fêmea</Text>
+                                                            </TouchableOpacity>
+                                                        </View>
+                                                    </View>
+                                                    <View className="flex-1">
+                                                        <Text className="text-gray-400 text-[9px] font-black uppercase ml-1 mb-2">Porte</Text>
+                                                        <View className="flex-row gap-x-1">
+                                                            {["Pequeno", "Médio", "Grande"].map((p) => (
+                                                                <TouchableOpacity
+                                                                    key={p}
+                                                                    onPress={() => { pet.porte = p; setMeusPets([...meusPets]); }}
+                                                                    className={`flex-1 py-3 rounded-2xl border ${pet.porte === p || (p === "Médio" && pet.porte === "Medio") ? "bg-[#4876A8] border-[#4876A8]" : "bg-white border-gray-100"}`}
+                                                                >
+                                                                    <Text className={`text-center font-bold text-[8px] ${pet.porte === p || (p === "Médio" && pet.porte === "Medio") ? "text-white" : "text-gray-400"}`}>{p[0]}</Text>
+                                                                </TouchableOpacity>
+                                                            ))}
+                                                        </View>
                                                     </View>
                                                 </View>
-                                            </View>
 
-                                            <View>
-                                                <Text className="text-gray-400 text-[9px] font-black uppercase ml-1 mb-1">Saúde / Observações</Text>
-                                                <TextInput 
-                                                    placeholder="Vacinado, castrado, dócil..."
-                                                    className="bg-white p-4 rounded-2xl border border-gray-100 text-sm font-medium"
-                                                    defaultValue={pet.saude}
-                                                    onChangeText={(val) => pet.saude = val}
-                                                />
-                                            </View>
+                                                <View>
+                                                    <Text className="text-gray-400 text-[9px] font-black uppercase ml-1 mb-1">Saúde / Observações</Text>
+                                                    <TextInput
+                                                        placeholder="Vacinado, castrado, dócil..."
+                                                        className="bg-white p-4 rounded-2xl border border-gray-100 text-sm font-medium"
+                                                        defaultValue={pet.saude}
+                                                        onChangeText={(val) => pet.saude = val}
+                                                    />
+                                                </View>
 
-                                            <View>
-                                                <Text className="text-gray-400 text-[9px] font-black uppercase ml-1 mb-1">Descrição do Anúncio</Text>
-                                                <TextInput 
-                                                    multiline
-                                                    numberOfLines={3}
-                                                    placeholder="Conte a história do pet..."
-                                                    className="bg-white p-4 rounded-2xl border border-gray-100 text-sm font-medium min-h-[80px]"
-                                                    defaultValue={pet.descricao}
-                                                    onChangeText={(val) => pet.descricao = val}
-                                                />
-                                            </View>
+                                                <View>
+                                                    <Text className="text-gray-400 text-[9px] font-black uppercase ml-1 mb-1">Descrição do Anúncio</Text>
+                                                    <TextInput
+                                                        multiline
+                                                        numberOfLines={3}
+                                                        placeholder="Conte a história do pet..."
+                                                        className="bg-white p-4 rounded-2xl border border-gray-100 text-sm font-medium min-h-[80px]"
+                                                        defaultValue={pet.descricao}
+                                                        onChangeText={(val) => pet.descricao = val}
+                                                    />
+                                                </View>
 
-                                            <TouchableOpacity 
-                                                onPress={() => handleUpdatePetInfo(pet)}
-                                                className="bg-[#4876A8] py-4 rounded-3xl items-center mt-2 shadow-lg shadow-blue-900/20"
-                                            >
-                                                <Text className="text-white font-black text-[10px] uppercase tracking-widest">Salvar Informações</Text>
-                                            </TouchableOpacity>
-                                        </View>
+                                                <View className="flex-row gap-x-3 mt-2">
+                                                    <TouchableOpacity
+                                                        onPress={() => setEditingPetId(null)}
+                                                        className="flex-1 bg-gray-100 py-4 rounded-3xl items-center"
+                                                    >
+                                                        <Text className="text-gray-400 font-black text-[10px] uppercase tracking-widest">Cancelar</Text>
+                                                    </TouchableOpacity>
+                                                    <TouchableOpacity
+                                                        onPress={() => { handleUpdatePetInfo(pet); setEditingPetId(null); }}
+                                                        className="flex-[2] bg-[#4876A8] py-4 rounded-3xl items-center shadow-lg shadow-blue-900/20"
+                                                    >
+                                                        <Text className="text-white font-black text-[10px] uppercase tracking-widest">Salvar Alterações</Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </View>
+                                        ) : (
+                                            <View className="flex-row gap-x-3 mt-2">
+                                                {pet.status !== "Adotado" && (
+                                                    <TouchableOpacity
+                                                        onPress={() => handleToggleAdocaoDirect(pet)}
+                                                        className={`flex-1 py-4 rounded-3xl items-center border ${isAdocao ? "bg-red-50 border-red-100" : "bg-orange-500 border-orange-500 shadow-lg shadow-orange-900/20"}`}
+                                                    >
+                                                        <Text className={`font-black text-[10px] uppercase tracking-widest ${isAdocao ? "text-red-500" : "text-white"}`}>
+                                                            {isAdocao ? "Remover Doação" : "Doar"}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                )}
+                                                <TouchableOpacity
+                                                    onPress={() => setEditingPetId(pet.id)}
+                                                    className="flex-1 bg-blue-50 py-4 rounded-3xl items-center border border-blue-100 flex-row justify-center"
+                                                >
+                                                    <Feather name="edit-3" size={14} color="#4876A8" />
+                                                    <Text className="text-[#4876A8] font-black text-[10px] uppercase tracking-widest ml-2">Editar</Text>
+                                                </TouchableOpacity>
+                                            </View>
+                                        )}
                                     </View>
                                 );
                             })

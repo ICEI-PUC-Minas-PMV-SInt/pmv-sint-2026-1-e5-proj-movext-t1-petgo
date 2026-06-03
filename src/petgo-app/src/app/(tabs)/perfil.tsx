@@ -49,6 +49,7 @@ export default function Perfil() {
   const [foco, setFoco] = useState<string | null>(null);
   const [fotoLocal, setFotoLocal] = useState(""); // URI local para exibição imediata
   const [fotoBase64, setFotoBase64] = useState(""); // base64 para enviar ao servidor
+  const [removerFoto, setRemoverFoto] = useState(false);
 
   const carregarPerfil = async () => {
     try {
@@ -101,11 +102,18 @@ export default function Perfil() {
 
     if (!result.canceled && result.assets[0]) {
       const asset = result.assets[0];
-      setFotoLocal(asset.uri); // Exibe imediatamente
+      setFotoLocal(asset.uri);
+      setRemoverFoto(false);
       if (asset.base64) {
         setFotoBase64(`data:image/jpeg;base64,${asset.base64}`);
       }
     }
+  };
+
+  const handleRemoverFoto = () => {
+    setFotoLocal("");
+    setFotoBase64("");
+    setRemoverFoto(true);
   };
 
   const handleUpdate = async () => {
@@ -119,17 +127,20 @@ export default function Perfil() {
       const userId = perfil?.id;
       if (!userId) return;
 
+      const fotoUrlToSend = removerFoto ? "" : (fotoBase64 || perfil?.fotoUrl || undefined);
+
       const updated = await usuarioService.editarUsuario(userId, {
         nome,
         email,
         telefone: telefone.replace(/\D/g, ""),
         endereco,
-        fotoUrl: fotoBase64 || perfil?.fotoUrl || undefined
+        fotoUrl: fotoUrlToSend
       });
 
       setPerfil(updated);
-      setFotoLocal(updated.fotoUrl || fotoLocal);
-      setFotoBase64(""); // Limpa o base64 após salvar
+      setFotoLocal(updated.fotoUrl || "");
+      setFotoBase64("");
+      setRemoverFoto(false);
       setTelefone(maskPhone(updated.telefone));
       Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
     } catch (error: any) {
@@ -189,7 +200,7 @@ export default function Perfil() {
               <TouchableOpacity onPress={handlePickFoto} activeOpacity={0.85}>
                 <View className="w-32 h-32 rounded-full bg-gray-100 items-center justify-center border-4 border-white shadow-md overflow-hidden">
                   {fotoLocal ? (
-                    <Image source={{ uri: fotoLocal }} className="w-full h-full" contentFit="cover" />
+                    <Image source={{ uri: fotoLocal }} style={{ width: 128, height: 128 }} contentFit="cover" />
                   ) : (
                     <View className="items-center">
                       <Feather name="user" size={52} color="#D1D5DB" />
@@ -200,6 +211,14 @@ export default function Perfil() {
                   <Feather name="camera" size={16} color="white" />
                 </View>
               </TouchableOpacity>
+              {fotoLocal ? (
+                <TouchableOpacity
+                  onPress={handleRemoverFoto}
+                  className="absolute top-0 right-0 bg-red-500 p-1.5 rounded-full border-2 border-white shadow-sm"
+                >
+                  <Feather name="x" size={12} color="white" />
+                </TouchableOpacity>
+              ) : null}
             </View>
             <Text className="text-xl font-bold text-gray-900 mt-4">{perfil?.nome}</Text>
             {fotoBase64 ? (

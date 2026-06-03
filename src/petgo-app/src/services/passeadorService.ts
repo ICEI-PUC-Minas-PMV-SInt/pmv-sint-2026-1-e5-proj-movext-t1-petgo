@@ -18,9 +18,10 @@ export const passeadorServicoService = {
             const response = await api.post<ApiResponse<PasseadorServicoResponseDto>>('/PasseadorServicos', dados);
             if (response.data.status) return response.data.dados;
             throw new Error(response.data.messagem || 'Erro ao salvar preço');
-        } catch (error) {
+        } catch (error: any) {
+            const mensagem = error.response?.data?.messagem || error.message || 'Erro ao salvar preço do serviço';
             console.error('Erro ao salvar preço do serviço:', error);
-            throw error;
+            throw new Error(mensagem);
         }
     },
 

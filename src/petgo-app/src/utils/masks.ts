@@ -53,10 +53,10 @@ export const maskTime = (value: string) => {
 export const maskCurrency = (value: string) => {
     value = value.replace(/\D/g, "");
     if (!value) return "";
-    
-    const floatValue = parseFloat(value) / 100;
-    return floatValue.toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    });
+
+    const num = parseInt(value, 10);
+    const reais = Math.floor(num / 100);
+    const centavos = (num % 100).toString().padStart(2, "0");
+    const reaisStr = reais.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return `${reaisStr},${centavos}`;
 };

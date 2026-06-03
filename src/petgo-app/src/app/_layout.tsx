@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { authService } from "../services/authService";
+import { setUnauthorizedHandler } from "../services/api";
 import "../styles/global.css";
 
 SplashScreen.preventAutoHideAsync();
@@ -18,6 +19,10 @@ export default function RootLayout() {
     "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
     "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
   });
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => setIsAuthenticated(false));
+  }, []);
 
   useEffect(() => {
     const checkAuthStatus = async () => {
