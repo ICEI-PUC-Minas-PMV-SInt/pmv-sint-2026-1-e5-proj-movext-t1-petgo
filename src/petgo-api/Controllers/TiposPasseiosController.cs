@@ -20,9 +20,9 @@ namespace petgo_api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<TipoPasseioResponseDto>>>> ListarTodos()
+        public async Task<ActionResult<ApiResponse<List<TipoPasseioResponseDto>>>> ListarTodos([FromQuery] Guid? passeadorId = null)
         {
-            var response = await _tipoPasseioInterface.ListarTodos();
+            var response = await _tipoPasseioInterface.ListarTodos(passeadorId);
             return Ok(response);
         }
 
@@ -42,9 +42,16 @@ namespace petgo_api.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<TipoPasseioResponseDto>>> CriarTipoPasseio(TipoPasseioCreateDto tipoPasseioCreate)
         {
-            if (GetUsuarioLogadoTipo() != TipoUsuario.Admin)
+            var tipoUsuario = GetUsuarioLogadoTipo();
+
+            if (tipoUsuario != TipoUsuario.Admin && tipoUsuario != TipoUsuario.Passeador)
             {
-                return ForbiddenResponse("Apenas administradores podem criar tipos de serviços globais.");
+                return ForbiddenResponse("Apenas administradores e passeadores podem criar tipos de passeio.");
+            }
+
+            if (tipoUsuario == TipoUsuario.Passeador)
+            {
+                tipoPasseioCreate.PasseadorId = GetUsuarioLogadoId();
             }
 
             var response = await _tipoPasseioInterface.CriarTipoPasseio(tipoPasseioCreate);

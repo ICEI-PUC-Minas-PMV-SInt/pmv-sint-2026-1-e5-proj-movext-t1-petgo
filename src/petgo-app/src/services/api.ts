@@ -51,7 +51,7 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         if (error.response?.status === 401) {
-            await AsyncStorage.multiRemove(["@PetGo:token", "@PetGo:usuario"]);
+            await AsyncStorage.multiRemove(["@PetGo:token", "@PetGo:userId", "@PetGo:userType"]);
             onUnauthorized?.();
         }
         return Promise.reject(error);

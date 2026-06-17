@@ -124,6 +124,13 @@ namespace petgo_api.Services.Passeios
                     return response;
                 }
 
+                var passeadorServico = await _context.PasseadorServicos
+                    .FirstOrDefaultAsync(ps =>
+                        ps.PasseadorId == passeioCreate.PasseadorId &&
+                        ps.TipoPasseioId == passeioCreate.TipoPasseioId);
+
+                var valorFinal = passeadorServico?.PrecoCustomizado ?? tipo.PrecoBase;
+
                 var novoPasseio = new Passeio
                 {
                     Id = Guid.NewGuid(),
@@ -133,7 +140,7 @@ namespace petgo_api.Services.Passeios
                     PetId = passeioCreate.PetId,
                     TutorId = usuarioLogadoId,
                     TipoPasseioId = passeioCreate.TipoPasseioId,
-                    ValorTotal = tipo.PrecoBase,
+                    ValorTotal = valorFinal,
                     Status = StatusPasseio.Pendente
                 };
 

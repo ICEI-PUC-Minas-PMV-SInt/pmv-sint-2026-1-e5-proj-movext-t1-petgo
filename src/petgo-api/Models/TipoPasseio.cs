@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace petgo_api.Models
 {
@@ -16,5 +17,10 @@ namespace petgo_api.Models
         [Required(ErrorMessage = "O preço é obrigatório.")]
         [Range(0.01, 10000.00, ErrorMessage = "O preço deve estar entre 0.01 e 10.000,00.")]
         public decimal PrecoBase { get; set; }
+
+        public Guid? PasseadorId { get; set; }
+
+        [ForeignKey("PasseadorId")]
+        public virtual Usuario? Passeador { get; set; }
     }
 }

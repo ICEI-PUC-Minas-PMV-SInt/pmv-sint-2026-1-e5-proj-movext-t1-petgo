@@ -1,5 +1,5 @@
 import { useFonts } from "expo-font";
-import { Slot, useRouter, useSegments } from "expo-router";
+import { Slot, useRouter, useSegments, useRootNavigationState } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -10,21 +10,19 @@ import "../styles/global.css";
 
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function AuthGuard({ fontsLoaded }: { fontsLoaded: boolean }) {
   const router = useRouter();
   const segments = useSegments();
+  const navigationState = useRootNavigationState();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-
-  const [fontsLoaded, error] = useFonts({
-    "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
-    "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
-  });
 
   useEffect(() => {
     setUnauthorizedHandler(() => setIsAuthenticated(false));
   }, []);
 
   useEffect(() => {
+    if (!navigationState?.key) return;
+
     const checkAuthStatus = async () => {
       try {
         const token = await authService.obterToken();
@@ -35,7 +33,7 @@ export default function RootLayout() {
 
         if (logado && isInsideAuthGroup) {
           router.replace("/");
-        } else if (!logado && !isInsideAuthGroup && isAuthenticated !== null) {
+        } else if (!logado && !isInsideAuthGroup) {
           router.replace("/(auth)/login");
         }
       } catch (err) {
@@ -47,23 +45,33 @@ export default function RootLayout() {
       checkAuthStatus();
       SplashScreen.hideAsync();
     }
-  }, [segments, fontsLoaded, isAuthenticated]);
-
-  if (!fontsLoaded && !error) {
-    return null;
-  }
+  }, [segments, fontsLoaded, isAuthenticated, navigationState?.key]);
 
   if (isAuthenticated === null) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white' }}>
         <ActivityIndicator size="large" color="#4876A8" />
       </View>
     );
   }
 
+  return null;
+}
+
+export default function RootLayout() {
+  const [fontsLoaded, error] = useFonts({
+    "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
+    "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
+  });
+
+  if (!fontsLoaded && !error) {
+    return null;
+  }
+
   return (
     <SafeAreaProvider>
       <Slot />
+      <AuthGuard fontsLoaded={!!fontsLoaded} />
     </SafeAreaProvider>
   );
 }

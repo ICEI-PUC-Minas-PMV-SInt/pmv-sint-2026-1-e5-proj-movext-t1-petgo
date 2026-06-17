@@ -14,5 +14,7 @@ namespace petgo_api.DTOs.Passeio
         [Required]
         [Range(0.01, 10000)]
         public decimal PrecoBase { get; set; }
+
+        public Guid? PasseadorId { get; set; }
     }
 }

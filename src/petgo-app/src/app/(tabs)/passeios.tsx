@@ -17,13 +17,23 @@ import {
   View,
 } from "react-native";
 
+const formatarStatus = (status: string): string => {
+  const labels: Record<string, string> = {
+    Pendente: "Pendente",
+    Agendado: "Agendado",
+    EmAndamento: "Em Andamento",
+    Concluido: "Concluído",
+    Cancelado: "Cancelado",
+  };
+  return labels[status] ?? status;
+};
+
 export default function Passeios() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [userType, setUserType] = useState<string | null>(null);
   const [passeios, setPasseios] = useState<PasseioResponseDto[]>([]);
-  const [activeSubTab, setActiveSubTab] = useState<"trabalho" | "pessoal">("trabalho");
   const [selectedPasseio, setSelectedPasseio] = useState<PasseioResponseDto | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -33,17 +43,13 @@ export default function Passeios() {
       setUserType(type);
 
       let data: PasseioResponseDto[] = [];
-      
+
       if (type === "Passeador") {
-        if (activeSubTab === "trabalho") {
-          data = await passeioService.listarMinhaAgenda();
-        } else {
-          data = await passeioService.listarMeusAgendamentos();
-        }
+        data = await passeioService.listarMinhaAgenda();
       } else {
         data = await passeioService.listarMeusAgendamentos();
       }
-      
+
       setPasseios(data);
     } catch (error) {
       console.error("Erro ao carregar passeios:", error);
@@ -55,7 +61,7 @@ export default function Passeios() {
 
   useEffect(() => {
     carregarDados();
-  }, [activeSubTab]);
+  }, []);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -161,11 +167,11 @@ export default function Passeios() {
             item.status === 'Cancelado' ? 'bg-red-50' : 'bg-orange-50'
           }`}>
             <Text className={`text-[10px] font-black uppercase tracking-widest ${
-              item.status === 'Concluido' ? 'text-green-600' : 
+              item.status === 'Concluido' ? 'text-green-600' :
               item.status === 'EmAndamento' ? 'text-blue-600' :
               item.status === 'Cancelado' ? 'text-red-600' : 'text-orange-600'
             }`}>
-              {item.status}
+              {formatarStatus(item.status)}
             </Text>
           </View>
         </View>
@@ -228,24 +234,6 @@ export default function Passeios() {
         )}
       </View>
 
-      {userType === "Passeador" && (
-        <View className="flex-row px-8 mb-6 gap-x-2">
-            <TouchableOpacity 
-                onPress={() => setActiveSubTab("trabalho")}
-                className={`px-6 py-3 rounded-2xl flex-1 flex-row items-center justify-center border-2 ${activeSubTab === "trabalho" ? "bg-[#4876A8] border-[#4876A8]" : "bg-gray-50 border-gray-100"}`}
-            >
-                <MaterialCommunityIcons name="calendar-check" size={18} color={activeSubTab === "trabalho" ? "white" : "#9CA3AF"} />
-                <Text className={`font-black ml-2 uppercase tracking-widest text-[10px] ${activeSubTab === "trabalho" ? "text-white" : "text-gray-400"}`}>Agenda</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-                onPress={() => setActiveSubTab("pessoal")}
-                className={`px-6 py-3 rounded-2xl flex-1 flex-row items-center justify-center border-2 ${activeSubTab === "pessoal" ? "bg-[#4876A8] border-[#4876A8]" : "bg-gray-50 border-gray-100"}`}
-            >
-                <MaterialCommunityIcons name="paw" size={18} color={activeSubTab === "pessoal" ? "white" : "#9CA3AF"} />
-                <Text className={`font-black ml-2 uppercase tracking-widest text-[10px] ${activeSubTab === "pessoal" ? "text-white" : "text-gray-400"}`}>Meus Pedidos</Text>
-            </TouchableOpacity>
-        </View>
-      )}
 
       {loading ? (
         <View className="flex-1 justify-center items-center">
@@ -261,7 +249,7 @@ export default function Passeios() {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#4876A8"]} />
           }
           ListEmptyComponent={
-            userType === "Passeador" && activeSubTab === "trabalho" ? (
+            userType === "Passeador" ? (
               // Empty state especial para o Passeador sem passeios na agenda
               <View className="items-center justify-center py-10 mx-2">
                 <View className="bg-orange-50 p-8 rounded-full mb-6 border-2 border-orange-100">
@@ -322,7 +310,7 @@ export default function Passeios() {
                         contentContainerStyle={{ paddingHorizontal: 32, paddingTop: 24, paddingBottom: 40 }}
                     >
                         {/* Card do Topo: Mostra a OUTRA pessoa do passeio */}
-                        {(userType === "Passeador" && activeSubTab === "trabalho") ? (
+                        {userType === "Passeador" ? (
                             // Passeador vê o Tutor no topo
                             <View className="bg-blue-50 p-6 rounded-[32px] mb-6 flex-row items-center border border-blue-100">
                                 <View className="w-20 h-20 bg-white rounded-2xl items-center justify-center border-2 border-white shadow-sm">
@@ -348,7 +336,7 @@ export default function Passeios() {
                             <View className="bg-orange-50 p-6 rounded-[32px] mb-6 flex-row items-center border border-orange-100">
                                 <View className="w-20 h-20 bg-white rounded-2xl overflow-hidden items-center justify-center border-2 border-white shadow-sm">
                                     {selectedPasseio.fotoPasseadorUrl ? (
-                                        <Image source={{ uri: selectedPasseio.fotoPasseadorUrl }} className="w-full h-full" />
+                                        <Image source={{ uri: selectedPasseio.fotoPasseadorUrl }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                                     ) : (
                                         <MaterialCommunityIcons name="account" size={36} color="#F97316" />
                                     )}
@@ -372,7 +360,7 @@ export default function Passeios() {
                         <View className="bg-gray-50 p-5 rounded-[28px] flex-row items-center mb-6">
                             <View className="w-14 h-14 bg-white rounded-2xl overflow-hidden items-center justify-center border border-gray-100">
                                 {selectedPasseio.fotoPetUrl ? (
-                                    <Image source={{ uri: selectedPasseio.fotoPetUrl }} className="w-full h-full" />
+                                    <Image source={{ uri: selectedPasseio.fotoPetUrl }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                                 ) : (
                                     <MaterialCommunityIcons name="dog" size={28} color="#9CA3AF" />
                                 )}
@@ -419,12 +407,12 @@ export default function Passeios() {
                                   selectedPasseio.status === 'EmAndamento' ? 'bg-blue-100' :
                                   selectedPasseio.status === 'Cancelado' ? 'bg-red-100' : 'bg-orange-100'
                                 }`}>
-                                    <Text className={`font-black text-[9px] uppercase tracking-tighter ${
-                                      selectedPasseio.status === 'Concluido' ? 'text-green-700' : 
+                                    <Text className={`font-black text-sm ${
+                                      selectedPasseio.status === 'Concluido' ? 'text-green-700' :
                                       selectedPasseio.status === 'EmAndamento' ? 'text-blue-700' :
                                       selectedPasseio.status === 'Cancelado' ? 'text-red-700' : 'text-orange-700'
                                     }`}>
-                                        {selectedPasseio.status}
+                                        {formatarStatus(selectedPasseio.status)}
                                     </Text>
                                 </View>
                             </View>
@@ -443,7 +431,7 @@ export default function Passeios() {
                         </View>
 
                         {/* Ações separadas por perfil */}
-                        {(userType === "Passeador" && activeSubTab === "trabalho")
+                        {userType === "Passeador"
                             ? renderPasseadorActions(selectedPasseio)
                             : renderTutorActions(selectedPasseio)
                         }

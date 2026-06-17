@@ -37,12 +37,18 @@ export default function Servicos() {
   // Modals
   const [modalAddVisible, setModalAddVisible] = useState(false);
   const [modalPrecoVisible, setModalPrecoVisible] = useState(false);
+  const [modalCriarTipoVisible, setModalCriarTipoVisible] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // Form State
   const [selectedTipo, setSelectedTipo] =
     useState<TipoPasseioResponseDto | null>(null);
   const [preco, setPreco] = useState("");
+
+  // Form State — criar novo tipo
+  const [novoNome, setNovoNome] = useState("");
+  const [novaDuracao, setNovaDuracao] = useState("");
+  const [novoPreco, setNovoPreco] = useState("");
 
   const carregarDados = async () => {
     try {
@@ -51,7 +57,7 @@ export default function Servicos() {
       if (!userId) return;
 
       const [globais, meus] = await Promise.all([
-        passeioService.listarTiposPasseios(),
+        passeioService.listarTiposPasseios(userId),
         passeadorServicoService.listarPorPasseador(userId),
       ]);
 
@@ -69,20 +75,53 @@ export default function Servicos() {
   }, []);
 
   const handleOpenAdd = () => {
-    // Filtra apenas os tipos globais que eu ainda NÃO ofereço
-    const disponiveis = tiposGlobais.filter(
-      (g) => !meusServicos.some((m) => m.tipoPasseioId === g.id),
-    );
+    setModalAddVisible(true);
+  };
 
-    if (disponiveis.length === 0) {
-      Alert.alert(
-        "Atenção",
-        "Você já oferece todos os tipos de passeios disponíveis no sistema!",
-      );
+  const handleCriarTipo = async () => {
+    if (!novoNome.trim() || !novaDuracao || !novoPreco) {
+      Alert.alert("Atenção", "Preencha nome, duração e preço.");
       return;
     }
 
-    setModalAddVisible(true);
+    const duracaoNum = parseInt(novaDuracao, 10);
+    const precoLimpo = novoPreco.replace(/\./g, "").replace(",", ".");
+    const precoNum = parseFloat(precoLimpo);
+
+    if (isNaN(duracaoNum) || duracaoNum <= 0) {
+      Alert.alert("Atenção", "Informe uma duração válida em minutos.");
+      return;
+    }
+
+    if (isNaN(precoNum) || precoNum <= 0) {
+      Alert.alert("Atenção", "Informe um preço válido.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const novoTipo = await passeioService.criarTipoPasseio({
+        nome: novoNome.trim(),
+        duracaoMinutos: duracaoNum,
+        precoBase: precoNum,
+      });
+
+      setNovoNome("");
+      setNovaDuracao("");
+      setNovoPreco("");
+      setModalCriarTipoVisible(false);
+
+      // Abre modal de preço com o novo tipo já selecionado
+      setSelectedTipo(novoTipo);
+      setPreco(maskCurrency(Math.round(precoNum * 100).toString()));
+      setModalPrecoVisible(true);
+
+      await carregarDados();
+    } catch (error: any) {
+      Alert.alert("Erro", error.message || "Não foi possível criar o tipo de passeio.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSelectTemplate = (tipo: TipoPasseioResponseDto) => {
@@ -171,10 +210,7 @@ export default function Servicos() {
           </View>
         </View>
         <Text className="text-[#4876A8] font-black text-2xl tracking-tighter">
-          R${" "}
-          {item.precoBase
-            ? item.precoBase.toFixed(2)
-            : item.precoCustomizado.toFixed(2)}
+          R$ {item.precoCustomizado.toFixed(2)}
         </Text>
       </View>
 
@@ -291,12 +327,112 @@ export default function Servicos() {
                     <Feather name="chevron-right" size={20} color="#D1D5DB" />
                   </TouchableOpacity>
                 ))}
+
+              <TouchableOpacity
+                onPress={() => {
+                  setModalAddVisible(false);
+                  setModalCriarTipoVisible(true);
+                }}
+                className="mt-2 py-5 rounded-3xl border-2 border-dashed border-orange-200 items-center flex-row justify-center gap-x-2"
+              >
+                <Feather name="plus-circle" size={18} color="#F97316" />
+                <Text className="text-orange-500 font-black text-sm uppercase tracking-widest">
+                  Criar tipo personalizado
+                </Text>
+              </TouchableOpacity>
             </ScrollView>
           </View>
         </View>
       </Modal>
 
-      {/* Modal 2: Definir Preço */}
+      {/* Modal 2: Criar Tipo Personalizado */}
+      <Modal visible={modalCriarTipoVisible} animationType="slide" transparent={true}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className="flex-1"
+        >
+          <View className="flex-1 bg-black/60 justify-end">
+            <View className="bg-white rounded-t-[50px] p-8 pb-12">
+              <View className="flex-row justify-between items-center mb-8">
+                <View>
+                  <Text className="text-2xl font-black text-orange-500 tracking-tighter">
+                    Novo Tipo de Passeio
+                  </Text>
+                  <Text className="text-gray-400 font-bold text-sm mt-1">
+                    Crie um serviço exclusivo seu
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => setModalCriarTipoVisible(false)}
+                  className="bg-gray-50 p-3 rounded-2xl"
+                >
+                  <Feather name="x" size={20} color="#D1D5DB" />
+                </TouchableOpacity>
+              </View>
+
+              <View className="gap-y-4">
+                <View>
+                  <Text className="text-gray-500 text-xs font-bold uppercase tracking-widest ml-1 mb-2">
+                    Nome do serviço
+                  </Text>
+                  <TextInput
+                    value={novoNome}
+                    onChangeText={setNovoNome}
+                    placeholder="Ex: Passeio na praia, Trilha com pets..."
+                    placeholderTextColor="#D1D5DB"
+                    className="bg-gray-50 p-4 rounded-2xl border-2 border-gray-100 text-gray-900 font-medium"
+                  />
+                </View>
+
+                <View className="flex-row gap-x-4">
+                  <View className="flex-1">
+                    <Text className="text-gray-500 text-xs font-bold uppercase tracking-widest ml-1 mb-2">
+                      Duração (min)
+                    </Text>
+                    <TextInput
+                      value={novaDuracao}
+                      onChangeText={setNovaDuracao}
+                      placeholder="60"
+                      placeholderTextColor="#D1D5DB"
+                      keyboardType="numeric"
+                      className="bg-gray-50 p-4 rounded-2xl border-2 border-gray-100 text-gray-900 font-medium"
+                    />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-gray-500 text-xs font-bold uppercase tracking-widest ml-1 mb-2">
+                      Preço (R$)
+                    </Text>
+                    <TextInput
+                      value={novoPreco}
+                      onChangeText={(t) => setNovoPreco(maskCurrency(t))}
+                      placeholder="0,00"
+                      placeholderTextColor="#D1D5DB"
+                      keyboardType="numeric"
+                      className="bg-gray-50 p-4 rounded-2xl border-2 border-gray-100 text-gray-900 font-medium"
+                    />
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  onPress={handleCriarTipo}
+                  disabled={saving}
+                  className="bg-orange-500 py-5 rounded-full items-center shadow-lg shadow-orange-900/20 mt-2"
+                >
+                  {saving ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    <Text className="text-white font-black text-lg uppercase tracking-widest">
+                      Criar Tipo
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Modal 3: Definir Preço */}
       <Modal
         visible={modalPrecoVisible}
         animationType="slide"

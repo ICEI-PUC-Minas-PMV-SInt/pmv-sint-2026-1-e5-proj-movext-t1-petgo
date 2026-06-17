@@ -42,6 +42,13 @@ namespace petgo_api.Data
                 .Property(p => p.PrecoBase)
                 .HasPrecision(18, 2);
 
+            modelBuilder.Entity<TipoPasseio>()
+                .HasOne(t => t.Passeador)
+                .WithMany()
+                .HasForeignKey(t => t.PasseadorId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
+
             modelBuilder.Entity<Passeio>()
                 .HasOne(p => p.Tutor)
                 .WithMany()

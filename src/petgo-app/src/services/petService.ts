@@ -19,7 +19,7 @@ export const petService = {
   listarPets: async (): Promise<PetResponseDto[]> => {
     try {
       const response = await api.get("/pets");
-      return response.data.dados || [];
+      return response.data.dados ?? (Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error("Erro ao listar todos os pets:", error);
       throw error;

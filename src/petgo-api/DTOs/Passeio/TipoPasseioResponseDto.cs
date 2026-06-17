@@ -11,5 +11,6 @@ namespace petgo_api.DTOs.Passeio
         public string Nome { get; set; }
         public int DuracaoMinutos { get; set; }
         public decimal PrecoBase { get; set; }
+        public Guid? PasseadorId { get; set; }
     }
 }

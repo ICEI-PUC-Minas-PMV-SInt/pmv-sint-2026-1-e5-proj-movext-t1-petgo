@@ -89,8 +89,9 @@ namespace petgo_api.Services.Adocoes
                 }
                 else if (adocaoStatusUpdate.NovoStatus == StatusAdocao.Adotado)
                 {
-                    // Pickup confirmado: transferir posse agora
+                    // Pickup confirmado: transferir posse e resetar status para o novo dono gerenciar
                     adocao.Pet.UsuarioId = adocao.AdotanteId;
+                    adocao.Pet.Status = StatusPet.DisponivelPasseio;
                     _context.Pets.Update(adocao.Pet);
                 }
                 else if (adocaoStatusUpdate.NovoStatus == StatusAdocao.Recusado && statusAnterior == StatusAdocao.Aprovado)

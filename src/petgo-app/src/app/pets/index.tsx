@@ -32,6 +32,9 @@ export default function MeusPets() {
   const [especie, setEspecie] = useState<Especie>(Especie.Cachorro);
   const [raca, setRaca] = useState("");
   const [idade, setIdade] = useState("");
+  const [sexo, setSexo] = useState<0 | 1>(0); // 0=Macho, 1=Fêmea
+  const [porte, setPorte] = useState<0 | 1 | 2>(1); // 0=Pequeno, 1=Médio, 2=Grande
+  const [saude, setSaude] = useState("");
   const [descricao, setDescricao] = useState("");
   const [fotoUrl, setFotoUrl] = useState("");
   const [fotoLocal, setFotoLocal] = useState(""); // URI local para exibição
@@ -60,9 +63,12 @@ export default function MeusPets() {
       setEspecie(pet.especie);
       setRaca(pet.raca);
       setIdade(pet.idade.toString());
+      setSexo(pet.sexo === "Femea" || pet.sexo === "Fêmea" || pet.sexo === "1" || (pet.sexo as any) === 1 ? 1 : 0);
+      setPorte(pet.porte === "Grande" || pet.porte === "2" || (pet.porte as any) === 2 ? 2 : pet.porte === "Pequeno" || pet.porte === "0" || (pet.porte as any) === 0 ? 0 : 1);
+      setSaude(pet.saude && pet.saude !== "N/A" ? pet.saude : "");
       setDescricao(pet.descricao || "");
       setFotoUrl(pet.fotoUrl || "");
-      setFotoLocal(pet.fotoUrl || ""); // Carrega a URL existente para exibição
+      setFotoLocal(pet.fotoUrl || "");
     } else {
       setEditingPet(null);
       resetForm();
@@ -72,13 +78,13 @@ export default function MeusPets() {
 
   const handleSalvarPet = async () => {
     if (!nome || !raca || !idade) {
-      Alert.alert("Atenção", "Preencha os campos obrigatórios.");
+      Alert.alert("Atenção", "Preencha os campos obrigatórios: nome, raça e idade.");
       return;
     }
 
     try {
       setIsSaving(true);
-      
+
       const petData = {
         nome,
         especie,
@@ -86,9 +92,9 @@ export default function MeusPets() {
         idade: parseInt(idade),
         descricao,
         fotoUrl: fotoUrl,
-        sexo: especie === Especie.Cachorro ? 0 : 1, // Defaulting if not in form yet
-        porte: 1, // Médio default
-        saude: "N/A"
+        sexo,
+        porte,
+        saude: saude.trim() || "N/A"
       };
 
       if (editingPet) {
@@ -114,6 +120,9 @@ export default function MeusPets() {
     setEspecie(Especie.Cachorro);
     setRaca("");
     setIdade("");
+    setSexo(0);
+    setPorte(1);
+    setSaude("");
     setDescricao("");
     setFotoUrl("");
     setFotoLocal("");
@@ -395,6 +404,40 @@ export default function MeusPets() {
                 onChangeText={setIdade}
                 placeholder="Ex: 2"
                 keyboardType="numeric"
+                className="bg-gray-50 p-5 rounded-[24px] mb-6 font-bold text-gray-900 border border-gray-100"
+              />
+
+              <Text className="text-gray-400 text-[10px] font-black mb-3 uppercase tracking-widest ml-4">SEXO</Text>
+              <View className="flex-row gap-x-3 mb-6">
+                {([{ id: 0, label: "Macho" }, { id: 1, label: "Fêmea" }] as const).map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => setSexo(item.id)}
+                    className={`flex-1 items-center py-4 rounded-[24px] border-2 ${sexo === item.id ? (item.id === 0 ? "bg-blue-50 border-[#4876A8]" : "bg-pink-50 border-pink-400") : "bg-gray-50 border-gray-50"}`}
+                  >
+                    <Text className={`text-sm font-black ${sexo === item.id ? (item.id === 0 ? "text-[#4876A8]" : "text-pink-500") : "text-gray-400"}`}>{item.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text className="text-gray-400 text-[10px] font-black mb-3 uppercase tracking-widest ml-4">PORTE</Text>
+              <View className="flex-row gap-x-3 mb-6">
+                {([{ id: 0, label: "Pequeno" }, { id: 1, label: "Médio" }, { id: 2, label: "Grande" }] as const).map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => setPorte(item.id)}
+                    className={`flex-1 items-center py-4 rounded-[24px] border-2 ${porte === item.id ? "bg-blue-50 border-[#4876A8]" : "bg-gray-50 border-gray-50"}`}
+                  >
+                    <Text className={`text-sm font-black ${porte === item.id ? "text-[#4876A8]" : "text-gray-400"}`}>{item.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text className="text-gray-400 text-[10px] font-black mb-3 uppercase tracking-widest ml-4">SAÚDE / OBSERVAÇÕES</Text>
+              <TextInput
+                value={saude}
+                onChangeText={setSaude}
+                placeholder="Ex: Vacinado, castrado, dócil..."
                 className="bg-gray-50 p-5 rounded-[24px] mb-6 font-bold text-gray-900 border border-gray-100"
               />
 

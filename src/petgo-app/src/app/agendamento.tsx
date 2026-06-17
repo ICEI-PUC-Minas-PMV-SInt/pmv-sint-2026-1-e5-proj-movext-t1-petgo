@@ -1,8 +1,8 @@
 import { petService } from "@/src/services/petService";
 import { passeioService } from "@/src/services/passeioService";
-import { maskDate, maskTime } from "@/src/utils/masks";
 import { PetResponseDto } from "@/src/types/pet";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -30,8 +30,13 @@ export default function Agendamento() {
   const [scheduling, setScheduling] = useState(false);
   const [pets, setPets] = useState<PetResponseDto[]>([]);
   const [petSelecionado, setPetSelecionado] = useState<string | null>(null);
-  const [data, setData] = useState("");
-  const [hora, setHora] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const d = new Date();
+    d.setHours(d.getHours() + 1, 0, 0, 0);
+    return d;
+  });
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [enderecoBusca, setEnderecoBusca] = useState("");
   const [observacoes, setObservacoes] = useState("");
 
@@ -62,16 +67,20 @@ export default function Agendamento() {
   }, []);
 
   const handleConfirmar = async () => {
-    if (!petSelecionado || !data || !hora || !enderecoBusca) {
-      Alert.alert("Atenção", "Por favor, preencha o pet, data, horário e endereço de busca.");
+    if (!petSelecionado || !enderecoBusca) {
+      Alert.alert("Atenção", "Por favor, preencha o pet e o endereço de busca.");
+      return;
+    }
+
+    if (selectedDate <= new Date()) {
+      Alert.alert("Atenção", "Selecione uma data e horário futuros.");
       return;
     }
 
     try {
       setScheduling(true);
-      
-      const [dia, mes, ano] = data.split("/");
-      const isoString = `${ano}-${mes}-${dia}T${hora}:00Z`;
+
+      const isoString = selectedDate.toISOString();
 
       const descricaoFinal = `📍 ENDEREÇO DE BUSCA: ${enderecoBusca}\n⏱️ DURAÇÃO: ${servicoDuracao} minutos\n\n📝 OBSERVAÇÕES: ${observacoes || "Nenhuma"}`;
 
@@ -169,35 +178,63 @@ export default function Agendamento() {
         <View className="flex-row gap-x-4 mb-6">
           <View className="flex-1">
             <Text className="text-gray-800 font-bold mb-3 ml-1">Data</Text>
-            <View className="flex-row items-center px-4 py-3 rounded-2xl border-2 border-gray-100 bg-gray-50">
-              <Feather name="calendar" size={18} color="#D1D5DB" />
-              <TextInput
-                placeholder="DD/MM/AAAA"
-                placeholderTextColor="#D1D5DB"
-                value={data}
-                onChangeText={(t) => setData(maskDate(t))}
-                keyboardType="numeric"
-                maxLength={10}
-                className="ml-3 text-gray-900 font-medium flex-1"
-              />
-            </View>
+            <TouchableOpacity
+              onPress={() => setShowDatePicker(true)}
+              className="flex-row items-center px-4 py-3 rounded-2xl border-2 border-gray-100 bg-gray-50"
+            >
+              <Feather name="calendar" size={18} color="#4876A8" />
+              <Text className="ml-3 text-gray-900 font-medium flex-1">
+                {selectedDate.toLocaleDateString("pt-BR")}
+              </Text>
+            </TouchableOpacity>
           </View>
           <View className="flex-1">
             <Text className="text-gray-800 font-bold mb-3 ml-1">Horário</Text>
-            <View className="flex-row items-center px-4 py-3 rounded-2xl border-2 border-gray-100 bg-gray-50">
-              <Feather name="clock" size={18} color="#D1D5DB" />
-              <TextInput
-                placeholder="HH:MM"
-                placeholderTextColor="#D1D5DB"
-                value={hora}
-                onChangeText={(t) => setHora(maskTime(t))}
-                keyboardType="numeric"
-                maxLength={5}
-                className="ml-3 text-gray-900 font-medium flex-1"
-              />
-            </View>
+            <TouchableOpacity
+              onPress={() => setShowTimePicker(true)}
+              className="flex-row items-center px-4 py-3 rounded-2xl border-2 border-gray-100 bg-gray-50"
+            >
+              <Feather name="clock" size={18} color="#4876A8" />
+              <Text className="ml-3 text-gray-900 font-medium flex-1">
+                {selectedDate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={selectedDate}
+            mode="date"
+            display="default"
+            minimumDate={new Date()}
+            onChange={(_, date) => {
+              setShowDatePicker(false);
+              if (date) {
+                const updated = new Date(date);
+                updated.setHours(selectedDate.getHours(), selectedDate.getMinutes(), 0, 0);
+                setSelectedDate(updated);
+              }
+            }}
+          />
+        )}
+
+        {showTimePicker && (
+          <DateTimePicker
+            value={selectedDate}
+            mode="time"
+            display="default"
+            is24Hour={true}
+            onChange={(_, date) => {
+              setShowTimePicker(false);
+              if (date) {
+                const updated = new Date(selectedDate);
+                updated.setHours(date.getHours(), date.getMinutes(), 0, 0);
+                setSelectedDate(updated);
+              }
+            }}
+          />
+        )}
 
         {/* Endereço de Busca */}
         <View className="mb-6">

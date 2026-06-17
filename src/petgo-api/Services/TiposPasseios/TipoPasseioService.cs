@@ -25,7 +25,8 @@ namespace petgo_api.Services.TiposPasseios
                     Id = Guid.NewGuid(),
                     Nome = tipoCreate.Nome,
                     DuracaoMinutos = tipoCreate.DuracaoMinutos,
-                    PrecoBase = tipoCreate.PrecoBase
+                    PrecoBase = tipoCreate.PrecoBase,
+                    PasseadorId = tipoCreate.PasseadorId
                 };
 
                 _context.TiposPasseios.Add(novoTipo);
@@ -133,13 +134,20 @@ namespace petgo_api.Services.TiposPasseios
             return response;
         }
 
-        public async Task<ApiResponse<List<TipoPasseioResponseDto>>> ListarTodos()
+        public async Task<ApiResponse<List<TipoPasseioResponseDto>>> ListarTodos(Guid? passeadorId = null)
         {
             var response = new ApiResponse<List<TipoPasseioResponseDto>>();
 
             try
             {
-                var tiposPasseios = await _context.TiposPasseios.ToListAsync();
+                var query = _context.TiposPasseios.AsQueryable();
+
+                if (passeadorId.HasValue)
+                    query = query.Where(t => t.PasseadorId == null || t.PasseadorId == passeadorId);
+                else
+                    query = query.Where(t => t.PasseadorId == null);
+
+                var tiposPasseios = await query.ToListAsync();
 
                 response.Dados = tiposPasseios.Select(t => MaptoDto(t)).ToList();
                 response.Messagem = "Lista de tipos de passeios recuperada com sucesso!";
@@ -161,7 +169,8 @@ namespace petgo_api.Services.TiposPasseios
                 Id = tipoPasseio.Id,
                 Nome = tipoPasseio.Nome,
                 DuracaoMinutos = tipoPasseio.DuracaoMinutos,
-                PrecoBase = tipoPasseio.PrecoBase
+                PrecoBase = tipoPasseio.PrecoBase,
+                PasseadorId = tipoPasseio.PasseadorId
             };
         }
     }

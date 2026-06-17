@@ -4,7 +4,7 @@ import { authService } from "@/src/services/authService";
 import { PetResponseDto } from "@/src/types/pet";
 import { AdocaoResponseDto } from "@/src/types/adocao";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -20,9 +20,31 @@ import {
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 
 type TabType = "disponiveis" | "minhas";
+
+const formatarStatusAdocao = (status: string): string => {
+  const labels: Record<string, string> = {
+    Pendente: "Pendente",
+    EmAnalise: "Em Análise",
+    Aprovado: "Aprovado",
+    Recusado: "Recusado",
+    Adotado: "Entregue",
+  };
+  return labels[status] ?? status;
+};
+
+const getStatusAccent = (status: string): string => {
+  switch (status.toLowerCase()) {
+    case "adotado":   return "bg-purple-400";
+    case "aprovado":  return "bg-green-400";
+    case "recusado":  return "bg-red-400";
+    case "pendente":  return "bg-amber-400";
+    case "emanalise": return "bg-blue-400";
+    default:          return "bg-gray-200";
+  }
+};
 
 export default function Doacoes() {
   const insets = useSafeAreaInsets();
@@ -56,7 +78,10 @@ export default function Doacoes() {
 
       if (activeTab === "disponiveis") {
         const pets = await petService.listarPets();
-        setPetsDisponiveis(pets.filter(p => p.status === "DisponivelAdocao"));
+        const lista = pets
+          .filter(p => p.status === "DisponivelAdocao")
+          .sort((a, b) => (a.tipoDono?.toLowerCase() === "ong" ? -1 : b.tipoDono?.toLowerCase() === "ong" ? 1 : 0));
+        setPetsDisponiveis(lista);
       } else {
         const [sent, received] = await Promise.all([
           adocaoService.listarMinhasSolicitacoes(),
@@ -67,6 +92,7 @@ export default function Doacoes() {
       }
     } catch (error) {
       console.error("Erro ao carregar doações:", error);
+      Alert.alert("Erro", "Não foi possível carregar os dados. Verifique sua conexão e tente novamente.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -108,7 +134,26 @@ export default function Doacoes() {
 
   const handleToggleAdocaoDirect = async (pet: PetResponseDto) => {
     const isAdocao = pet.status === "DisponivelAdocao";
-    const novoStatus = isAdocao ? 0 : 1; // 0=DisponivelPasseio, 1=DisponivelAdocao
+    const novoStatus = isAdocao ? 0 : 1;
+
+    if (!isAdocao) {
+      const faltando: string[] = [];
+      if (!pet.fotoUrl || pet.fotoUrl.trim() === "") faltando.push("• Foto do pet");
+      if (!pet.descricao || pet.descricao.trim().length < 10) faltando.push("• Descrição (mínimo 10 caracteres)");
+      if (!pet.saude || pet.saude.trim() === "" || pet.saude === "N/A") faltando.push("• Saúde / Observações");
+
+      if (faltando.length > 0) {
+        Alert.alert(
+          "Campos incompletos para adoção",
+          `Complete as informações antes de anunciar:\n\n${faltando.join("\n")}`,
+          [
+            { text: "Editar Pet", onPress: () => setEditingPetId(pet.id) },
+            { text: "Cancelar", style: "cancel" },
+          ]
+        );
+        return;
+      }
+    }
 
     try {
         await petService.alterarStatus(pet.id, novoStatus);
@@ -157,6 +202,12 @@ export default function Doacoes() {
     carregarDados();
   }, [activeTab]);
 
+  useFocusEffect(
+    useCallback(() => {
+      carregarDados();
+    }, [activeTab])
+  );
+
   const handleSolicitarAdocao = async (petId: string) => {
     Alert.alert(
       "Confirmar Interesse",
@@ -184,36 +235,69 @@ export default function Doacoes() {
   };
 
   const renderReceivedRequestItem = ({ item }: { item: AdocaoResponseDto }) => (
-    <TouchableOpacity 
-      activeOpacity={0.9}
+    <TouchableOpacity
+      activeOpacity={0.92}
       onPress={() => setSelectedAdocao(item)}
-      className="bg-white mx-8 mb-4 p-6 rounded-[35px] border border-gray-50 shadow-lg shadow-gray-200/50"
+      className="bg-white mx-6 mb-4 rounded-[32px] overflow-hidden border border-gray-100 shadow-xl shadow-gray-300/40"
     >
-      <View className="flex-row items-center mb-4">
-        <View className="bg-[#4876A8]/5 rounded-2xl items-center justify-center mr-4 border border-[#4876A8]/10 overflow-hidden" style={{ width: 60, height: 60 }}>
+      {/* Status accent bar */}
+      <View className={`h-1.5 w-full ${getStatusAccent(item.status)}`} />
+
+      <View className="px-6 pt-5 pb-4">
+        {/* Adopter ——♥—— Pet visual connection */}
+        <View className="flex-row items-center mb-5">
+          <View className="rounded-[20px] overflow-hidden border-2 border-gray-100" style={{ width: 60, height: 60 }}>
             {item.fotoAdotanteUrl ? (
-                <Image source={{ uri: item.fotoAdotanteUrl }} style={{ width: 60, height: 60 }} contentFit="cover" />
+              <Image source={{ uri: item.fotoAdotanteUrl }} style={{ width: 60, height: 60 }} contentFit="cover" />
             ) : (
-                <Feather name="user" size={32} color="#4876A8" />
+              <View style={{ width: 60, height: 60 }} className="bg-[#4876A8]/10 items-center justify-center">
+                <Feather name="user" size={26} color="#4876A8" />
+              </View>
             )}
+          </View>
+          <View className="flex-1 items-center px-3">
+            <Text className="text-gray-400 text-[9px] font-black uppercase tracking-widest mb-1.5">quer adotar</Text>
+            <View className="flex-row items-center w-full">
+              <View className="flex-1 h-px bg-gray-100" />
+              <View className="bg-orange-50 rounded-full p-1.5 border border-orange-100 mx-2">
+                <MaterialCommunityIcons name="heart" size={14} color="#F97316" />
+              </View>
+              <View className="flex-1 h-px bg-gray-100" />
+            </View>
+          </View>
+          <View className="rounded-[20px] overflow-hidden border-2 border-orange-100" style={{ width: 60, height: 60 }}>
+            <Image
+              source={item.fotoPetUrl || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=200"}
+              style={{ width: 60, height: 60 }}
+              contentFit="cover"
+            />
+          </View>
         </View>
-        <View className="flex-1">
-          <Text className="text-lg font-black text-gray-900 tracking-tighter">{item.nomeAdotante}</Text>
-          <Text className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mt-0.5">Interessado em: {item.nomePet}</Text>
-        </View>
-        <View className={`px-3 py-1 rounded-full border ${getStatusColor(item.status)}`}>
-            <Text className="text-[9px] font-black uppercase tracking-widest">{item.status}</Text>
+
+        {/* Names + status */}
+        <View className="flex-row items-end justify-between">
+          <View className="flex-1 mr-3">
+            <Text className="text-gray-900 font-black text-xl tracking-tighter" numberOfLines={1}>{item.nomeAdotante}</Text>
+            <View className="flex-row items-center mt-0.5">
+              <MaterialCommunityIcons name="paw" size={11} color="#9CA3AF" />
+              <Text className="text-gray-400 text-[10px] font-bold ml-1" numberOfLines={1}>{item.nomePet}</Text>
+            </View>
+          </View>
+          <View className={`px-3 py-1.5 rounded-full border ${getStatusColor(item.status)}`}>
+            <Text className="text-[9px] font-black uppercase tracking-widest">{formatarStatusAdocao(item.status)}</Text>
+          </View>
         </View>
       </View>
 
-      <View className="flex-row items-center justify-between pt-4 border-t border-gray-50">
+      {/* Footer */}
+      <View className="flex-row items-center justify-between px-6 py-3 bg-gray-50 border-t border-gray-100">
         <View className="flex-row items-center">
-            <Feather name="calendar" size={14} color="#9CA3AF" />
-            <Text className="text-gray-400 text-[10px] font-bold ml-1">{new Date(item.dataSolicitacao).toLocaleDateString("pt-BR")}</Text>
+          <Feather name="calendar" size={11} color="#9CA3AF" />
+          <Text className="text-gray-400 text-[10px] font-bold ml-1">{new Date(item.dataSolicitacao).toLocaleDateString("pt-BR")}</Text>
         </View>
-        <View className="bg-gray-50 px-4 py-2 rounded-xl flex-row items-center">
-            <Text className="text-[#4876A8] font-black text-[10px] uppercase tracking-widest mr-2">Ver Detalhes</Text>
-            <Feather name="chevron-right" size={14} color="#4876A8" />
+        <View className="flex-row items-center">
+          <Text className="text-[#4876A8] font-black text-[10px] uppercase tracking-widest mr-1">Ver detalhes</Text>
+          <Feather name="chevron-right" size={13} color="#4876A8" />
         </View>
       </View>
     </TouchableOpacity>
@@ -232,107 +316,129 @@ export default function Doacoes() {
 
   const renderPetItem = ({ item }: { item: PetResponseDto }) => {
     const isMine = item.usuarioId === currentUserId;
+    const isOng = item.tipoDono?.toLowerCase() === "ong";
 
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         onPress={() => setSelectedPet(item)}
-        activeOpacity={0.9}
-        className={`bg-white mx-8 mb-8 rounded-[45px] overflow-hidden border-2 shadow-xl shadow-gray-200 ${isMine ? "border-orange-500/30" : "border-gray-50"}`}
+        activeOpacity={0.85}
+        className={`bg-white mx-4 mb-3 rounded-[28px] overflow-hidden border shadow-sm shadow-gray-200 ${isMine ? "border-orange-200" : isOng ? "border-blue-100" : "border-gray-100"}`}
       >
-        <View className="relative">
-          <Image 
-            source={(item.fotoUrl && item.fotoUrl.trim() !== "") ? item.fotoUrl : "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400"} 
-            style={{ width: '100%', height: 280 }}
-            contentFit="cover"
-            transition={500}
-          />
-          <View className="absolute top-6 left-6 right-6 flex-row justify-between items-start">
-            <View className="bg-white/90 px-4 py-2 rounded-2xl border border-white">
-                <Text className="text-gray-900 font-black text-[10px] uppercase tracking-widest">{item.especie}</Text>
-            </View>
-            <View className="items-end gap-y-2">
-                <View className="bg-blue-500 px-4 py-2 rounded-2xl shadow-lg">
-                    <Text className="text-white font-black text-[10px]">{item.idade} {item.idade === 1 ? "ano" : "anos"}</Text>
-                </View>
-                {isMine && (
-                    <View className="bg-orange-600 px-4 py-2 rounded-2xl shadow-lg border border-orange-400">
-                        <Text className="text-white font-black text-[10px] uppercase tracking-tighter">MEU PET</Text>
-                    </View>
-                )}
-            </View>
-          </View>
-          {isMine && (
-              <View className="absolute bottom-0 left-0 right-0 bg-orange-600/90 py-2 items-center">
-                  <Text className="text-white font-black text-[9px] uppercase tracking-[3px]">VOCÊ ESTÁ DOANDO</Text>
+        <View className="flex-row items-center p-4 gap-x-4">
+          <View className="relative">
+            <Image
+              source={(item.fotoUrl && item.fotoUrl.trim() !== "") ? item.fotoUrl : "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400"}
+              style={{ width: 90, height: 90, borderRadius: 20 }}
+              contentFit="cover"
+              transition={300}
+            />
+            {isMine && (
+              <View className="absolute -top-1 -right-1 bg-orange-500 px-2 py-0.5 rounded-full border border-white">
+                <Text className="text-white font-black text-[7px] uppercase">Meu</Text>
               </View>
-          )}
+            )}
+          </View>
+
+          <View className="flex-1">
+            <View className="flex-row items-center justify-between mb-0.5">
+              <Text className="text-gray-900 font-black text-lg tracking-tighter flex-1 mr-2" numberOfLines={1}>{item.nome}</Text>
+              <View className="bg-blue-50 px-2.5 py-1 rounded-full">
+                <Text className="text-[#4876A8] font-black text-[10px]">{item.idade} {item.idade === 1 ? "ano" : "anos"}</Text>
+              </View>
+            </View>
+
+            <Text className="text-gray-400 font-semibold text-xs mb-2" numberOfLines={1}>{item.raca}</Text>
+
+            <View className="flex-row items-center gap-x-2 flex-wrap">
+              <View className="bg-gray-100 px-2.5 py-1 rounded-full">
+                <Text className="text-gray-500 font-bold text-[9px] uppercase">{item.especie}</Text>
+              </View>
+              <View className="bg-gray-100 px-2.5 py-1 rounded-full">
+                <Text className="text-gray-500 font-bold text-[9px] uppercase">{item.sexo}</Text>
+              </View>
+              <View className="bg-gray-100 px-2.5 py-1 rounded-full">
+                <Text className="text-gray-500 font-bold text-[9px] uppercase">{item.porte}</Text>
+              </View>
+            </View>
+
+            {isOng && (
+              <View className="flex-row items-center mt-2">
+                <View className="bg-[#4876A8] px-2.5 py-1 rounded-full flex-row items-center">
+                  <MaterialCommunityIcons name="shield-check" size={9} color="white" />
+                  <Text className="text-white font-black text-[8px] uppercase tracking-widest ml-1">ONG Parceira</Text>
+                </View>
+              </View>
+            )}
+          </View>
+
+          <Feather name="chevron-right" size={18} color="#D1D5DB" />
         </View>
 
-        <View className="p-8">
-          <View className="mb-4">
-            <Text className="text-3xl font-black text-gray-900 tracking-tighter mb-1">{item.nome}</Text>
-            <Text className="text-gray-400 font-bold text-lg">{item.raca}</Text>
+        {isMine && (
+          <View className="bg-orange-50 py-2 items-center border-t border-orange-100">
+            <Text className="text-orange-500 font-black text-[9px] uppercase tracking-[2px]">Você está doando este pet</Text>
           </View>
-          <View className="h-[1px] bg-gray-100 w-full mb-6" />
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center">
-                <View className="bg-blue-50 p-2.5 rounded-xl mr-3">
-                    <MaterialCommunityIcons name="account-heart-outline" size={18} color="#4876A8" />
-                </View>
-                <View>
-                    <Text className="text-gray-400 text-[9px] font-black uppercase tracking-widest">Resgatado por</Text>
-                    <Text className="text-gray-900 font-black text-sm tracking-tighter">{item.nomeDono}</Text>
-                </View>
-            </View>
-            <View className="bg-gray-50 p-3 rounded-2xl">
-                <Feather name="chevron-right" size={20} color="#D1D5DB" />
-            </View>
-          </View>
-        </View>
+        )}
       </TouchableOpacity>
     );
   };
 
   const renderRequestItem = ({ item }: { item: AdocaoResponseDto }) => (
-    <View className="bg-white mx-8 mb-4 rounded-[35px] border border-gray-50 shadow-lg shadow-gray-200/50 overflow-hidden">
-      <TouchableOpacity
-        onPress={() => {
-          const pet = petsDisponiveis.find(p => p.id === item.petId);
-          if (pet) setSelectedPet(pet);
-          else Alert.alert("Informação", `Pedido para ${item.nomePet}.\nStatus: ${item.status}\nData: ${new Date(item.dataSolicitacao).toLocaleDateString("pt-BR")}`);
-        }}
-        className="p-6 flex-row items-center"
-      >
-        <View className="bg-gray-50 rounded-2xl overflow-hidden mr-4 border border-gray-100" style={{ width: 70, height: 70 }}>
+    <TouchableOpacity
+      activeOpacity={0.92}
+      onPress={() => {
+        const pet = petsDisponiveis.find(p => p.id === item.petId);
+        if (pet) setSelectedPet(pet);
+        else Alert.alert("Informação", `Pedido para ${item.nomePet}.\nStatus: ${formatarStatusAdocao(item.status)}\nData: ${new Date(item.dataSolicitacao).toLocaleDateString("pt-BR")}`);
+      }}
+      className="bg-white mx-6 mb-4 rounded-[32px] overflow-hidden border border-gray-100 shadow-xl shadow-gray-300/40"
+    >
+      {/* Status accent bar */}
+      <View className={`h-1.5 w-full ${getStatusAccent(item.status)}`} />
+
+      <View className="p-6">
+        <View className="flex-row items-center">
+          {/* Pet photo */}
+          <View className="rounded-[20px] overflow-hidden border-2 border-gray-100 mr-5" style={{ width: 84, height: 84 }}>
             <Image
-              source={ item.fotoPetUrl || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=200" }
-              style={{ width: '100%', height: '100%' }}
+              source={item.fotoPetUrl || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=200"}
+              style={{ width: 84, height: 84 }}
               contentFit="cover"
-              transition={500}
+              transition={300}
             />
-        </View>
-        <View className="flex-1">
-          <View className="flex-row justify-between items-start mb-1">
-              <Text className="text-xl font-black text-gray-900 tracking-tighter">{item.nomePet}</Text>
-              <View className={`px-3 py-1 rounded-full border ${getStatusColor(item.status)}`}>
-                  <Text className="text-[9px] font-black uppercase tracking-widest">{item.status}</Text>
-              </View>
           </View>
-          <Text className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Solicitado em {new Date(item.dataSolicitacao).toLocaleDateString("pt-BR")}</Text>
+          {/* Info */}
+          <View className="flex-1">
+            <Text className="text-gray-900 font-black text-xl tracking-tighter mb-1" numberOfLines={1}>{item.nomePet}</Text>
+            {item.nomeDoador ? (
+              <View className="flex-row items-center mb-2">
+                <Feather name="home" size={11} color="#9CA3AF" />
+                <Text className="text-gray-400 text-[10px] font-bold ml-1" numberOfLines={1}>{item.nomeDoador}</Text>
+              </View>
+            ) : null}
+            <View className={`self-start px-3 py-1.5 rounded-full border ${getStatusColor(item.status)}`}>
+              <Text className="text-[9px] font-black uppercase tracking-widest">{formatarStatusAdocao(item.status)}</Text>
+            </View>
+          </View>
         </View>
-        <View className="bg-gray-50 p-2 rounded-xl ml-2">
-          <Feather name="chevron-right" size={18} color="#D1D5DB" />
+
+        {/* Footer inside card */}
+        <View className="flex-row items-center justify-between mt-4 pt-4 border-t border-gray-50">
+          <View className="flex-row items-center">
+            <Feather name="calendar" size={11} color="#9CA3AF" />
+            <Text className="text-gray-400 text-[10px] font-bold ml-1">Solicitado em {new Date(item.dataSolicitacao).toLocaleDateString("pt-BR")}</Text>
+          </View>
+          <Feather name="chevron-right" size={16} color="#D1D5DB" />
         </View>
-      </TouchableOpacity>
+      </View>
+
       {item.status === "Aprovado" && (
-        <TouchableOpacity
-          onPress={() => handleUpdateAdocaoStatus(item.id, 4)}
-          className="mx-4 mb-4 bg-purple-500 py-4 rounded-2xl items-center shadow-md shadow-purple-900/20"
-        >
-          <Text className="text-white font-black uppercase tracking-widest text-[10px]">Confirmar Retirada do Pet</Text>
-        </TouchableOpacity>
+        <View className="mx-5 mb-5 bg-green-50 py-3 rounded-2xl items-center border border-green-100 flex-row justify-center">
+          <MaterialCommunityIcons name="check-circle" size={14} color="#16A34A" />
+          <Text className="text-green-700 font-black uppercase tracking-widest text-[10px] ml-2">Aprovada — aguarde contato para retirada</Text>
+        </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -500,7 +606,7 @@ export default function Doacoes() {
                         </View>
                     ) : (
                         <View className={`p-5 rounded-3xl items-center border ${getStatusColor(selectedAdocao?.status || "")}`}>
-                            <Text className="font-black uppercase tracking-widest text-[10px]">Status: {selectedAdocao?.status}</Text>
+                            <Text className="font-black uppercase tracking-widest text-[10px]">Status: {formatarStatusAdocao(selectedAdocao?.status ?? "")}</Text>
                         </View>
                     )}
                 </View>
@@ -644,6 +750,15 @@ export default function Doacoes() {
                                         <Text className="text-gray-900 font-black text-[10px] text-center" numberOfLines={1}>{selectedPet?.saude || "N/A"}</Text>
                                     </View>
                                 </View>
+                                {selectedPet?.tipoDono?.toLowerCase() === "ong" && (
+                                    <View className="flex-row items-center bg-blue-50 px-4 py-3 rounded-2xl border border-[#4876A8]/20 mb-6">
+                                        <MaterialCommunityIcons name="shield-check" size={18} color="#4876A8" />
+                                        <View className="ml-3">
+                                            <Text className="text-[#4876A8] font-black text-xs uppercase tracking-widest">ONG Parceira PetGo</Text>
+                                            <Text className="text-gray-400 text-[10px] font-medium mt-0.5">Este pet é oferecido por uma organização parceira</Text>
+                                        </View>
+                                    </View>
+                                )}
                                 <Text className="text-gray-900 text-xl font-black mb-4 tracking-tight">Sobre {selectedPet?.nome}</Text>
                                 <Text className="text-gray-500 leading-6 text-base mb-10 font-medium">
                                     {selectedPet?.descricao || "Este pet é muito dócil e está ansioso por um novo lar cheio de amor e carinho."}
@@ -724,19 +839,20 @@ export default function Doacoes() {
                                     <View key={pet.id} className="mb-6 bg-gray-50 p-6 rounded-[32px] border border-gray-100">
                                         <View className="flex-row items-center justify-between mb-4">
                                             <View className="flex-row items-center flex-1">
-                                                <Image 
-                                                    source={ pet.fotoUrl || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400" } 
-                                                    style={{ width: 56, height: 56, borderRadius: 16 }}
+                                                <Image
+                                                    source={ pet.fotoUrl || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400" }
+                                                    style={{ width: 56, height: 56, borderRadius: 16, marginRight: 16 }}
                                                     contentFit="cover"
-                                                    className="mr-4"
                                                 />
                                                 <View>
                                                     <Text className="text-gray-900 font-black tracking-tighter text-lg">{pet.nome}</Text>
                                                     <Text className="text-gray-400 text-[10px] font-black uppercase tracking-tighter">{pet.raca}</Text>
                                                 </View>
                                             </View>
-                                            <View className={`px-3 py-1 rounded-full ${isAdocao ? "bg-orange-500" : (pet.status === "Adotado" ? "bg-green-500" : "bg-blue-500")}`}>
-                                                <Text className="text-white text-[8px] font-black uppercase">{pet.status.replace("Disponivel", "").toUpperCase()}</Text>
+                                            <View className={`px-3 py-1 rounded-full ${isAdocao ? "bg-orange-500" : (pet.status === "Adotado" ? "bg-amber-500" : "bg-blue-500")}`}>
+                                                <Text className="text-white text-[8px] font-black uppercase">
+                                                    {pet.status === "DisponivelAdocao" ? "Anunciado" : pet.status === "Adotado" ? "Reservado" : "Disponível"}
+                                                </Text>
                                             </View>
                                         </View>
                                         {editingPetId === pet.id ? (

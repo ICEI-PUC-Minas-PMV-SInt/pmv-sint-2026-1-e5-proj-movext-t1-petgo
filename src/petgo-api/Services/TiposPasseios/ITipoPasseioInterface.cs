@@ -5,7 +5,7 @@ namespace petgo_api.Services.TiposPasseios
 {
     public interface ITipoPasseioInterface
     {
-        Task<ApiResponse<List<TipoPasseioResponseDto>>> ListarTodos();
+        Task<ApiResponse<List<TipoPasseioResponseDto>>> ListarTodos(Guid? passeadorId = null);
         Task<ApiResponse<TipoPasseioResponseDto>> GetTipoPasseioById(Guid id);
         Task<ApiResponse<TipoPasseioResponseDto>> CriarTipoPasseio(TipoPasseioCreateDto tipoCreate);
         Task<ApiResponse<TipoPasseioResponseDto>> EditarTipoPasseio(Guid id, TipoPasseioCreateDto tipoEditar);
