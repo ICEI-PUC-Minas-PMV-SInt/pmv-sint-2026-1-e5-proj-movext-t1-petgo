@@ -1,8 +1,9 @@
 import { useFonts } from "expo-font";
-import { Slot, useRouter, useSegments, useRootNavigationState } from "expo-router";
+import { Stack, useRouter, useSegments, useRootNavigationState } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { authService } from "../services/authService";
 import { setUnauthorizedHandler } from "../services/api";
@@ -69,9 +70,11 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <Slot />
-      <AuthGuard fontsLoaded={!!fontsLoaded} />
-    </SafeAreaProvider>
+    <PaperProvider>
+      <SafeAreaProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+        <AuthGuard fontsLoaded={!!fontsLoaded} />
+      </SafeAreaProvider>
+    </PaperProvider>
   );
 }

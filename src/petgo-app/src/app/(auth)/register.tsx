@@ -44,9 +44,11 @@ const InputField = ({
   <View className="mb-5">
     <Text className="text-gray-500 text-[10px] font-black mb-2 ml-5 uppercase tracking-widest">{label}</Text>
     <View
-      className={`flex-row items-center px-6 py-4 rounded-full border-2 bg-gray-50 ${
-        foco === id ? "border-[#4876A8] bg-white shadow-sm" : "border-gray-50"
-      }`}
+      className="flex-row items-center px-6 py-4 rounded-full border-2"
+      style={{
+        borderColor: foco === id ? "#4876A8" : "#E5E7EB",
+        backgroundColor: foco === id ? "white" : "#F9FAFB",
+      }}
     >
       <Feather
         name={icon}
